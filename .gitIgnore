@@ -1,47 +1,55 @@
-# Dependencies
-node_modules/
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-package-lock.json
-yarn.lock
+# Ignore the virtual environment folder
+venv/
 
-# Environment variables
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore local environment files
 .env
-.env.local
-.env.*.local
+.env.*
 
-# Build output
-dist/
-build/
-out/
-
-# IDE and editor files
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-
-# Coverage directory
-coverage/
-
-# Debug logs
-logs/
+# Ignore any temporary files
 *.log
+*.tmp
+*.temp
 
-# Optional npm cache directory
-.npm
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# Optional eslint cache
-.eslintcache
+# Ignore macOS-specific files
+.DS_Store
 
-# Optional: misc
-*.pid
-*.seed
-*.pid.lock
+# Ignore package management files
+pip-log.txt
+pip-delete-this-directory.txt
 
+# Ignore coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
 
-# Extension
-./temp/*
+# Ignore testing and debugging files
+.tox/
+.nox/
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.pyre/
+
+# Ignore documentation builds
+/site
+
+# Ignore any temporary or backup files
+*.bak
+*~
