@@ -5,7 +5,9 @@
     "version": "0.1",
     "permissions": [
         "sidePanel",
-        "contextMenus"
+        "contextMenus",
+        "scripting",
+        "activeTab"
     ],
     "action": {
         "default_title": "Click to open popup",
