@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Define the route that receives text and returns processed data
+# Defining the route that receives text and returns processed data
 @app.route('/process-text', methods=['POST'])
 def process_text():
     # Get the text from the request's JSON body
