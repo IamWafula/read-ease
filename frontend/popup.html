@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <div id="login-page">
+    <h2>Login/Register</h2>
+    <input type="text" id="username" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="login-btn">Login</button>
+    <button id="register-btn">Register</button>
+    <button id="google-login-btn">Login with Google</button>
+  </div>
+  
+  <div id="main-page" class="hidden">
+    <h2>Welcome to ReadEase</h2>
+    <div id="highlight-preferences">
+      <h3>Highlight Preferences</h3>
+      <div class="color-option" data-color="yellow">Yellow</div>
+      <div class="color-option" data-color="green">Green</div>
+      <div class="color-option" data-color="blue">Blue</div>
+    </div>
+  </div>
+  
+  <script src="static/firebase/firebase-app.js" type="module"></script>
+  <script src="static/firebase/firebase-auth.js" type="module"></script>
+  <script src="static/script.js" type="module"></script>
+  
+</body>
+</html>
