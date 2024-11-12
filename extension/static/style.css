@@ -38,6 +38,7 @@ h1 {
     justify-content: center;
     position: relative; /* Allows positioning of inner elements */
     transition: transform 0.3s, box-shadow 0.3s;
+    z-index: 10
 }
 
 /* Arrow icon styling */
@@ -98,6 +99,46 @@ h1 {
     transform: translateX(-50%);
     width: 40px;
     height: 40px;
+    z-index: 10;
     border: none;
     cursor: pointer;
+}
+
+
+/* Style the opacity slider */
+.custom-opacity-slider {
+    -webkit-appearance: none;
+    z-index: 5;
+    width: 200px; /* Slider length */
+    height: 6px; /* Slightly thinner slider track */
+    background: #d3d3d3; /* Light grey for the track */
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-top: 20px; /* Adds space to lower the slider */
+}
+
+/* Style for the slider thumb */
+.custom-opacity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px; /* Smaller width for thumb */
+    height: 10px; /* Smaller height for thumb */
+    background: #a9a9a9; /* Slightly darker shade of grey for the thumb */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.custom-opacity-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    background: #a9a9a9;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Hover effect for thumb */
+.custom-opacity-slider:hover {
+    opacity: 1;
 }

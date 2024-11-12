@@ -1,59 +1,106 @@
 const circles = document.querySelectorAll('.highlight-circle');
+const opacitySlider = document.getElementById('opacity-slider'); // Global opacity slider
+
+let globalOpacity = 1; // Default opacity
+
+// Track the currently active circle
+let activeCircle = null;
 
 circles.forEach(circle => {
     const arrowIcon = circle.querySelector('.arrow-icon');
     const colorPicker = circle.querySelector('.color-picker');
-    let isColorPickerOpen = false; // Track if the color picker is open
-    let isArrowVisible = false; // Track if the arrow is currently visible
+
+    // Initialize state variables for color picker open and arrow visibility
+    let isColorPickerOpen = false;
 
     // Handle click event on each circle
     circle.addEventListener('click', (e) => {
-        // Prevent click from immediately closing the color picker
         e.stopPropagation();
 
-        // Check if the arrow is already visible (second click)
-        if (isArrowVisible) {
-            // Toggle the color picker on the second click
+        if (activeCircle !== circle) {
+            if (activeCircle) {
+                const activeArrowIcon = activeCircle.querySelector('.arrow-icon');
+                const activeColorPicker = activeCircle.querySelector('.color-picker');
+
+                if (activeArrowIcon) activeArrowIcon.style.display = 'none';
+                if (activeColorPicker) activeColorPicker.style.display = 'none';
+
+                activeCircle.classList.remove('selected');
+            }
+
+            activeCircle = circle;
+            isColorPickerOpen = false;
+
+            if (arrowIcon) arrowIcon.style.display = 'block';
+            circle.classList.add('selected');
+        } else {
             if (isColorPickerOpen) {
-                colorPicker.style.display = 'none'; // Hide color picker if open
+                if (colorPicker) colorPicker.style.display = 'none';
                 isColorPickerOpen = false;
             } else {
-                colorPicker.style.display = 'block'; // Show color picker
-                colorPicker.focus(); // Focus on the color picker to open it automatically
+                if (colorPicker) {
+                    const currentColor = window.getComputedStyle(circle).backgroundColor;
+                    colorPicker.value = rgbToHex(currentColor);
+                    colorPicker.style.display = 'block';
+                    colorPicker.focus();
+                }
                 isColorPickerOpen = true;
             }
-        } else {
-            // First click: Show the arrow icon
-            // Deselect other circles and hide their color pickers
-            circles.forEach(c => {
-                c.classList.remove('selected');
-                c.querySelector('.color-picker').style.display = 'none';
-                c.isColorPickerOpen = false;
-                c.isArrowVisible = false; // Reset arrow visibility for other circles
-            });
-
-            // Select this circle and show the arrow
-            circle.classList.add('selected');
-            isArrowVisible = true;
-            isColorPickerOpen = false; // Ensure color picker stays hidden on first click
         }
     });
 
-    // When a color is picked, update the circle's background color
-    colorPicker.addEventListener('input', (event) => {
-        const newColor = event.target.value;
-        circle.style.backgroundColor = newColor;
-        circle.setAttribute('data-color', newColor); // Update the data-color attribute
+    // When a color is picked, update the circle's background color with global opacity
+    if (colorPicker) {
+        colorPicker.addEventListener('input', () => {
+            updateCircleBackground(circle, colorPicker.value, globalOpacity);
+        });
+    }
+});
+
+// Update all circles when the global opacity slider is adjusted
+opacitySlider.addEventListener('input', (event) => {
+    globalOpacity = event.target.value;
+    circles.forEach(circle => {
+        const color = circle.getAttribute('data-color') || '#FFD700';
+        updateCircleBackground(circle, color, globalOpacity);
     });
 });
 
+// Function to update background color with opacity
+function updateCircleBackground(circle, color, opacity) {
+    const rgbaColor = hexToRgba(color, opacity);
+    circle.style.backgroundColor = rgbaColor;
+    circle.setAttribute('data-color', color); // Store color without opacity in data attribute
+}
 
-// Hide the color picker when clicking outside
+// Utility function to convert HEX color to RGBA with opacity
+function hexToRgba(hex, opacity) {
+    const rgbValues = hex.match(/\w\w/g).map(x => parseInt(x, 16));
+    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
+}
+
+// Utility function to convert RGB to HEX (used to set initial color)
+function rgbToHex(rgb) {
+    const rgbValues = rgb.match(/\d+/g).map(Number);
+    return (
+        '#' +
+        rgbValues
+            .map(val => val.toString(16).padStart(2, '0'))
+            .join('')
+            .toUpperCase()
+    );
+}
+
+// Hide the color picker and arrow when clicking outside
 document.addEventListener('click', () => {
-    circles.forEach(circle => {
-        circle.querySelector('.color-picker').style.display = 'none';
-        circle.isColorPickerOpen = false;
-        circle.isArrowVisible = false;
-        circle.classList.remove('selected');
-    });
+    if (activeCircle) {
+        const arrowIcon = activeCircle.querySelector('.arrow-icon');
+        const colorPicker = activeCircle.querySelector('.color-picker');
+
+        if (arrowIcon) arrowIcon.style.display = 'none';
+        if (colorPicker) colorPicker.style.display = 'none';
+
+        activeCircle.classList.remove('selected');
+        activeCircle = null;
+    }
 });
