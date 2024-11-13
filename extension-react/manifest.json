@@ -8,7 +8,7 @@
             "matches": ["https://*/*"],
             "js": ["src/scripts/content.jsx"]
         }
-    ],
+    ],    
     "web_accessible_resources": [
         {
             "resources" : ["assets/*"],
