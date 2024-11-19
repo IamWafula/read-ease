@@ -4,6 +4,7 @@ from config import Config
 # Configure the API with the key
 genai.configure(api_key=Config.API_KEY)
 
+
 def extract_keywords(text):
     # Define the prompt for keyword extraction
     prompt = f"Extract the key words and key phrases from the following text:\n\n{text}"
@@ -16,5 +17,5 @@ def extract_keywords(text):
 
     # Process the response to extract keywords
     keywords = response.text.strip()
-    keywords_list = [keyword.strip() for keyword in keywords.split(',')]
+    keywords_list = [keyword.strip() for keyword in keywords.split(",")]
     return keywords_list

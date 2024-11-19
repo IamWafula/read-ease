@@ -53,3 +53,5 @@ htmlcov/
 # Ignore any temporary or backup files
 *.bak
 *~
+
+*text_analysis_dummy.py
