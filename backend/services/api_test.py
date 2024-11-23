@@ -1,7 +1,11 @@
 import unittest
 import os
-import ast 
+import ast
 import google.generativeai as genai
+import dotenv
+
+dotenv.load_dotenv()
+
 
 class TestGeminiTextAnalysis(unittest.TestCase):
     @classmethod
@@ -52,25 +56,22 @@ class TestGeminiTextAnalysis(unittest.TestCase):
 
         # Remove code block markers if present
         if raw_text.startswith("```") and raw_text.endswith("```"):
-            raw_text = raw_text.split('\n', 1)[1].rsplit('\n', 1)[0].strip()
-            if raw_text.startswith('python'):
+            raw_text = raw_text.split("\n", 1)[1].rsplit("\n", 1)[0].strip()
+            if raw_text.startswith("python"):
                 raw_text = raw_text[6:].strip()
-        
+
         try:
             # Use ast.literal_eval instead of eval for safety
             return ast.literal_eval(raw_text)
         except (SyntaxError, ValueError):
             # If parsing fails, return empty results
-            return {
-                "keywords": [],
-                "sentences": []
-            }
+            return {"keywords": [], "sentences": []}
 
     def test_complete_return(self):
         """Test that the function returns a dictionary with the expected keys."""
         text = "The quick brown fox jumps over the lazy dog."
         output = self.generate_analysis(text)
-        
+
         self.assertIsInstance(output, dict)
         self.assertIn("keywords", output)
         self.assertIn("sentences", output)
@@ -81,7 +82,7 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test that the function returns keywords that make sense for the input text."""
         text = "The quick brown fox jumps over the lazy dog."
         output = self.generate_analysis(text)
-        
+
         self.assertGreater(len(output["keywords"]), 0)
         for keyword in output["keywords"]:
             self.assertIsInstance(keyword, str)
@@ -92,7 +93,7 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test that the function handles empty input appropriately."""
         text = ""
         output = self.generate_analysis(text)
-        
+
         self.assertEqual(output["keywords"], [])
         self.assertEqual(output["sentences"], [])
 
@@ -100,7 +101,7 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test that the function handles input with only punctuation."""
         text = ".,!?-"
         output = self.generate_analysis(text)
-        
+
         self.assertEqual(output["keywords"], [])
         self.assertTrue(len(output["sentences"]) == 0)
 
@@ -108,7 +109,7 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test that keywords don't contain punctuation."""
         text = "The quick brown fox jumps over the lazy dog!"
         output = self.generate_analysis(text)
-        
+
         punctuation = [".", ",", "!", "?", "-"]
         for keyword in output["keywords"]:
             for punct in punctuation:
@@ -118,7 +119,7 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test handling of technical content with specific terms."""
         text = "Python is a programming language. It supports object-oriented programming and functional programming paradigms."
         output = self.generate_analysis(text)
-        
+
         technical_terms = ["python", "programming", "object-oriented", "functional"]
         found_technical = False
         for keyword in output["keywords"]:
@@ -131,10 +132,11 @@ class TestGeminiTextAnalysis(unittest.TestCase):
         """Test that extracted sentences maintain original formatting and punctuation."""
         text = "First sentence! Second sentence? Third sentence."
         output = self.generate_analysis(text)
-        
+
         for sentence in output["sentences"]:
             self.assertTrue(any(sentence in text for text in [text]))
             self.assertTrue(any(punct in sentence for punct in [".", "!", "?"]))
+
 
 if __name__ == "__main__":
     unittest.main()
