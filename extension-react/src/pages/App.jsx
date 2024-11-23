@@ -11,6 +11,9 @@ function App() {
     { color: '#40E0D0', isColorPickerOpen: false },
   ]);
 
+  const [keywords, setKeywords] = useState([]);
+  const [sentences, setSentences] = useState([]);
+
   const handleCircleClick = (index) => {
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
@@ -102,8 +105,7 @@ function App() {
         onClick={() => {
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             chrome.tabs.sendMessage(tabs[0].id, {
-              action: 'highlightWords',
-              words: ['test', 'the', 'and'], // Example test words
+              action: 'highlightWords',              
               color : circles[activeCircle].color,
               opacity: globalOpacity,
             });

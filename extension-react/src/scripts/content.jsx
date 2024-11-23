@@ -7,22 +7,6 @@ function getWikipediaText() {
     return text;
 }
 
-window.onload = () => {
-    // get current URL
-    var currentUrl = window.location.href;
-    var mainText = null;
-
-    // check if URL is wikipedia
-    // TODO: Regex would be better for URL matching
-    if (currentUrl.includes("wikipedia.org")) {
-        // run the wikipedia script
-        mainText = getWikipediaText();
-    }
-
-    console.log(mainText);
-    // TODO: send the text to the background script OR Backend
-}
-
 // CSS for highlights
 const highlightStyle = `
   .read-ease-highlight {
@@ -84,13 +68,43 @@ function highlightWords(words) {
     processTextNodes(contentArea);
 }
 
+
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
         // TODO: Implement this function
         const color = request.color;
         const opacity = request.opacity;
-        highlightWords(request.words);
 
+        var currentUrl = window.location.href;
+        var mainText = null;
+
+        async function getKeywords(){
+
+            if (currentUrl.includes("wikipedia.org")) {
+                // run the wikipedia script
+                mainText = getWikipediaText();                            
+            }
+
+            const response = await fetch('http://127.0.0.1:5000/process-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"text": mainText})
+            });
+            const data = await response.json();
+
+            if (data.keywords.length > 0) {
+                highlightWords(data.keywords);
+            }
+
+            console.log(data);            
+        }
+
+
+        getKeywords(mainText);
+                
         sendResponse({ status: "highlighted" });
     }
 });
