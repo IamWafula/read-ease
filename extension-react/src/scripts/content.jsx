@@ -7,6 +7,7 @@ document.head.appendChild(styleSheet);
 
 function getWikipediaText() {
     const text = document.getElementById("bodyContent").innerText;
+    console.log('in getWikipediaText', text);
     return text;
 }
 
@@ -23,19 +24,23 @@ function updateHighlightStyle(color) {
 
 
 function highlightWords(phrases) {
+    console.log('Starting highlightWords with phrases:', phrases);
     const skipTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'EMBED'];
     
     // Sort phrases by length to avoid overlapping matches
     phrases.sort((a, b) => b.length - a.length);
+    console.log('Sorted phrases:', phrases);
 
     // Escape special characters in phrases
     phrases = phrases.map(phrase => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-
+    
     // Add negative lookbehind and negative lookahead to each phrase
     phrases = phrases.map(phrase => `(?<!\\w)${phrase}(?!\\w)`);
+    console.log('Processed phrases:', phrases);
 
     // Combine phrases into a single regex pattern
     const regex = new RegExp(phrases.join('|'), 'gi');
+    console.log('Created regex:', regex);
 
     // Collect all text nodes
     const walker = document.createTreeWalker(
@@ -43,7 +48,6 @@ function highlightWords(phrases) {
         NodeFilter.SHOW_TEXT,
         {
             acceptNode: function(node) {
-                // Skip empty nodes and unwanted parents
                 if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
                 if (node.parentElement && skipTags.includes(node.parentElement.tagName)) {
                     return NodeFilter.FILTER_REJECT;
@@ -58,14 +62,15 @@ function highlightWords(phrases) {
     let textContent = '';
     let offsets = [];
 
-    // Build a combined text and map of nodes
     while (node = walker.nextNode()) {
         offsets.push(textContent.length);
         textContent += node.textContent;
         nodes.push(node);
     }
 
-    // Collect matches, handling overlaps
+    //console.log('Collected text content:', textContent.substring(0, 100) + '...');
+    //console.log('Number of text nodes found:', nodes.length);
+
     let match;
     let matches = [];
 
@@ -77,6 +82,8 @@ function highlightWords(phrases) {
         });
     }
 
+    //console.log('Found matches:', matches);
+
     // Handle overlapping matches
     matches = matches.filter((match, index) => {
         if (index === 0) return true;
@@ -84,42 +91,74 @@ function highlightWords(phrases) {
         return match.start >= prevMatch.end;
     });
 
+    //console.log('After filtering overlaps:', matches);
+
     // Apply highlights to matches
-    for (let i = 0; i < matches.length; i++) {
+    for (let i = matches.length - 1; i >= 0; i--) {
         let match = matches[i];
-        let startIndex = match.start;
-        let endIndex = match.end;
+        console.log('Processing match:', match);
 
-        // Find starting node
-        let startNodeIndex = offsets.findIndex((offset, idx) =>
-            offset <= startIndex && (offsets[idx + 1] > startIndex || idx === offsets.length - 1)
-        );
-        let startNode = nodes[startNodeIndex];
-        let startOffset = startIndex - offsets[startNodeIndex];
+        try {
+            // Find starting node
+            let startNodeIndex = offsets.findIndex((offset, idx) =>
+                offset <= match.start && (offsets[idx + 1] > match.start || idx === offsets.length - 1)
+            );
+            let startNode = nodes[startNodeIndex];
+            let startOffset = match.start - offsets[startNodeIndex];
 
-        // Find ending node
-        let endNodeIndex = offsets.findIndex((offset, idx) =>
-            offset <= endIndex && (offsets[idx + 1] > endIndex || idx === offsets.length - 1)
-        );
-        let endNode = nodes[endNodeIndex];
-        let endOffset = endIndex - offsets[endNodeIndex];
+            console.log('Start node found:', {
+                index: startNodeIndex,
+                offset: startOffset,
+                text: startNode.textContent
+            });
 
-        // Create range and apply highlight
-        let range = document.createRange();
-        range.setStart(startNode, startOffset);
-        range.setEnd(endNode, endOffset);
+            // Find ending node
+            let endNodeIndex = offsets.findIndex((offset, idx) =>
+                offset <= match.end && (offsets[idx + 1] > match.end || idx === offsets.length - 1)
+            );
+            let endNode = nodes[endNodeIndex];
+            let endOffset = match.end - offsets[endNodeIndex];
 
-        let highlightSpan = document.createElement('span');
-        highlightSpan.className = 'read-ease-highlight';
-        range.surroundContents(highlightSpan);
+            console.log('End node found:', {
+                index: endNodeIndex,
+                offset: endOffset,
+                text: endNode.textContent
+            });
+
+            let range = document.createRange();
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+
+            let highlightSpan = document.createElement('span');
+            highlightSpan.className = 'read-ease-highlight';
+            
+            try {
+                range.surroundContents(highlightSpan);
+                console.log('Successfully highlighted:', match.match);
+            } catch (e) {
+                console.log('surroundContents failed, trying alternative method:', e);
+                const fragment = range.extractContents();
+                highlightSpan.appendChild(fragment);
+                range.insertNode(highlightSpan);
+                console.log('Alternative highlight method completed');
+            }
+
+        } catch (e) {
+            console.error('Failed to highlight match:', match.match, e);
+            continue;
+        }
     }
+    
+    console.log('Highlighting process completed');
 }
+
 
 // Listener to trigger the highlight function when the popup sends a message
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
         // TODO: Implement this function
-        const color = request.color;
+        const color = request.color || 'yellow';  // Default to yellow if no color provided
+        styleSheet.textContent = updateHighlightStyle(color);  // Update global style
         const opacity = request.opacity;
 
         var currentUrl = window.location.href;
@@ -142,7 +181,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const data = await response.json();
 
             if (data.keywords.length > 0) {
+                console.log('Starting highlighting process...');
+                const startTime = performance.now();
                 highlightWords(data.keywords);
+                const endTime = performance.now();
+                console.log(`Highlighting completed in ${(endTime - startTime).toFixed(2)}ms`);
             }
 
             console.log(data);            

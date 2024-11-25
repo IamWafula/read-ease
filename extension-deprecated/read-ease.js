@@ -129,13 +129,14 @@ function highlightWords(phrases) {
     }
 }
 
+
 // Listener to trigger the highlight function when the popup sends a message
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
         // Update style with selected color
         styleSheet.textContent = updateHighlightStyle(request.color);
         
-        const testWords = ['also known as the Jesse McHugh Rail Trail,', 'is a', 'is a core area'];
+        const testWords = ['is a', 'is a core area'];
         highlightWords(testWords);
         sendResponse({ status: "highlighted" });
     }
