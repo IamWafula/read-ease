@@ -1,3 +1,4 @@
+// read-ease.js
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
