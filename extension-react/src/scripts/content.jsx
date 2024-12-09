@@ -183,7 +183,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (data.keywords.length > 0) {
                 console.log('Starting highlighting process...');
                 const startTime = performance.now();
-                highlightWords(data.keywords);
+                highlightWords(data.sentences);
                 const endTime = performance.now();
                 console.log(`Highlighting completed in ${(endTime - startTime).toFixed(2)}ms`);
             }

@@ -1,17 +1,33 @@
 import React from 'react';
 import { auth } from '../firebase';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 
 const Login = () => {
   const handleLogin = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // User signed in
-      })
-      .catch((error) => {
-        // Handle Errors
-      });
+    chrome.identity.launchWebAuthFlow(
+      {
+        url: 'https://accounts.google.com/o/oauth2/auth?client_id=763128562280-rfoqnj6cul904pm54qls38839anmecvg.apps.googleusercontent.com&redirect_uri=https://' +
+             chrome.runtime.id + '.chromiumapp.org/&response_type=token&scope=email%20profile%20openid',
+        interactive: true
+      },
+      async (redirectUrl) => {
+        if (chrome.runtime.lastError || redirectUrl.includes('access_denied')) {
+          // Handle error
+          return;
+        }
+
+        const urlParams = new URLSearchParams(new URL(redirectUrl).hash.substring(1));
+        const accessToken = urlParams.get('access_token');
+
+        const credential = GoogleAuthProvider.credential(null, accessToken);
+        try {
+          await signInWithCredential(auth, credential);
+          // User signed in
+        } catch (error) {
+          // Handle Errors
+        }
+      }
+    );
   };
 
   return <button onClick={handleLogin}>Sign in with Google</button>;

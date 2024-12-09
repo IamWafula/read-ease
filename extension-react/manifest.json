@@ -1,19 +1,37 @@
-  {
+{
     "manifest_version": 3,
     "name": "ReadEase",
     "version": "1.0.0",
-    "action": { "default_popup": "index.html" },
-    "content_scripts": [
-      {
-        "matches": ["https://*/*"],
-        "js": ["src/scripts/content.jsx"]
-      }
-    ],
-    "permissions": ["storage", "activeTab", "identity"],
-    "oauth2": {
-      "client_id": "763128562280-rfoqnj6cul904pm54qls38839anmecvg.apps.googleusercontent.com",
-      "scopes": ["email", "profile", "openid"]
+    "action": { 
+        "default_popup": "index.html" 
     },
-    "content_security_policy": {
-      "extension_pages": "script-src 'self' https://www.gstatic.com https://apis.google.com https://securetoken.googleapis.com; object-src 'self'"}
-    }
+    "content_scripts": [
+        {
+            "matches": ["https://*/*"],
+            "js": ["src/scripts/content.jsx"]
+        }
+    ],
+    "permissions": [
+        "storage", 
+        "activeTab", 
+        "identity"
+    ],
+    "oauth2": {
+        "client_id": "763128562280-rfoqnj6cul904pm54qls38839anmecvg.apps.googleusercontent.com",
+        "scopes": [
+            "email",
+            "profile",
+            "openid"
+        ]
+    },
+    "host_permissions": [
+        "https://*.googleapis.com/*",
+        "https://*.firebaseapp.com/*"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["assets/*"],
+            "matches": ["https://*/*"]
+        }
+    ]
+}
