@@ -1,5 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import React, { useEffect, useState, useRef } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+import Login from './Login.jsx';
+
 
 function App() {
   const [globalOpacity, setGlobalOpacity] = useState(1);
@@ -10,6 +14,18 @@ function App() {
     { color: '#8A2BE2', isColorPickerOpen: false },
     { color: '#40E0D0', isColorPickerOpen: false },
   ]);
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  }, []);
+
+  if (!user) {
+    return <Login />;
+  }
 
   const [keywords, setKeywords] = useState([]);
   const [sentences, setSentences] = useState([]);
