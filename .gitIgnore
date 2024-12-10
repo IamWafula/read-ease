@@ -53,3 +53,6 @@ htmlcov/
 # Ignore any temporary or backup files
 *.bak
 *~
+
+*/node_modules/
+commands.md
