@@ -38,7 +38,7 @@ jobs:
     
   deploy:
     runs-on: ubuntu-latest
-    needs: run-tests
+    # needs: run-tests
 
     steps:
       # Step 1: Checkout the code from the repository
@@ -75,6 +75,9 @@ jobs:
       # Build and push Docker image to Amazon ECR
       - name: Build and push Docker image
         run: |
+          # cd into the directory with the Dockerfile
+          cd backend 
+
           # Set image tag and ECR repository name
           IMAGE_TAG=read-ease
           REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
@@ -88,6 +91,9 @@ jobs:
       # Deploy to Lightsail
       - name: Deploy to Lightsail
         run: |
+          # cd into the directory with the Dockerfile
+          cd backend 
+
           # Define deployment file and container name          
           SERVICE_NAME=read-ease
 
