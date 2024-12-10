@@ -54,4 +54,5 @@ htmlcov/
 *.bak
 *~
 
-readease/
+*/node_modules/
+commands.md
