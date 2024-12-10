@@ -1,11 +1,10 @@
 import React from 'react';
 import { auth } from '../firebase';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { clientIDConfig } from '../config';
+import { clientId } from '../config';
 
 const Login = () => {
   const handleLogin = () => {
-    const clientId = config.clientId;
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=https://${chrome.runtime.id}.chromiumapp.org/&response_type=token&scope=email%20profile%20openid`;
 
     chrome.identity.launchWebAuthFlow(
