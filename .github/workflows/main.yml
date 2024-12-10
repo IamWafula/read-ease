@@ -81,7 +81,7 @@ jobs:
 
           # Build the Docker image          
           docker buildx build \
-            --platform linux/amd64,linuxarm64 \
+            --platform linux/amd64,linux/arm64 \
             -t $REPOSITORY_URI:$IMAGE_TAG \
             --push . 
 
