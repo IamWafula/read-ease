@@ -1,8 +1,9 @@
-#api.py
+# api.py
 
 import google.generativeai as genai
 import os
 import ast
+
 # Set up the API key for authentication
 genai.configure(api_key=os.environ["API_KEY"])
 
@@ -10,8 +11,8 @@ genai.configure(api_key=os.environ["API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Read the content of your 'text.md' file (assuming it's in the 'temp' folder)
-file_path = '../temp/text.md'
-with open(file_path, 'r') as file:
+file_path = "../temp/text.md"
+with open(file_path, "r") as file:
     text = file.read()
 
 # Define the prompt for keyword and phrase extraction
@@ -69,7 +70,7 @@ print("Model Response Text:", response.text)
 # Strip Markdown code block syntax if present
 raw_text = response.text.strip()
 if raw_text.startswith("```") and raw_text.endswith("```"):
-    raw_text = raw_text.split('\n', 1)[1].rsplit('\n', 1)[0].strip()
+    raw_text = raw_text.split("\n", 1)[1].rsplit("\n", 1)[0].strip()
 
 # Try to parse the response into a Python dictionary
 try:
