@@ -1,7 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import React, { useEffect, useState, useRef } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase.js';
+import Login from './login.jsx';
+
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [activeCircle, setActiveCircle] = useState(null);
   const [circles, setCircles] = useState([
@@ -11,8 +17,17 @@ function App() {
     { color: '#40E0D0', isColorPickerOpen: false },
   ]);
 
-  const [keywords, setKeywords] = useState([]);
-  const [sentences, setSentences] = useState([]);
+  // Auth effect
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log('Auth state changed, currentUser:', currentUser);
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Event handlers
 
   const handleCircleClick = (index) => {
     setCircles((prevCircles) =>
@@ -36,7 +51,7 @@ function App() {
       })
     );
   };
-
+  
   const handleOpacityChange = (event) => {
     setGlobalOpacity(event.target.value);
   };
@@ -59,6 +74,16 @@ function App() {
     const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
     return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
   };
+
+  // Loading state
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Not logged in
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div id="body" onClick={(e) => e.stopPropagation()}>
