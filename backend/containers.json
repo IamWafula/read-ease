@@ -4,11 +4,5 @@
         "ports": {
             "3000": "HTTP"
         }
-    },
-    "postgres": {
-        "image": "677276084427.dkr.ecr.us-east-1.amazonaws.com/mysql:mysql",
-        "ports": {
-            "5432": "TCP"
-        }
-    }
+    }    
 }

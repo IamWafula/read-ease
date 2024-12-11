@@ -1,4 +1,3 @@
-
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
@@ -152,7 +151,6 @@ function highlightWords(phrases) {
     console.log('Highlighting process completed');
 }
 
-
 // Listener to trigger the highlight function when the popup sends a message
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
@@ -163,6 +161,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         var currentUrl = window.location.href;
         var mainText = null;
+        
 
         async function getKeywords(){
 
@@ -170,13 +169,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 // run the wikipedia script
                 mainText = getWikipediaText();                            
             }
-
             const response = await fetch('http://127.0.0.1:3000/process-text', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${request.token}`
                 },
-                body: JSON.stringify({"text": mainText})
+                body: JSON.stringify({"text": mainText, "uid": request.uid, "url": currentUrl})
             });
             const data = await response.json();
 
