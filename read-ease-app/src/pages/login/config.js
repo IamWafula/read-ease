@@ -10,7 +10,7 @@
 
 const firebaseConfig = {
     apiKey: "AIzaSyC47y3u6oM8P41MRMu7qyC6e6dn1oSpJt8",
-    authDomain: "chrome-extension://llcedechppjifikendnjpgffemlcgnhh",
+    authDomain: "cs162readease.firebaseapp.com",
     projectId: "cs162readease",
     storageBucket: "cs162readease.firebasestorage.app",
     messagingSenderId: "763128562280",

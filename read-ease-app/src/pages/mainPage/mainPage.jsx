@@ -21,6 +21,8 @@ export default function MainPage() {
         if (uid) {
             auth.currentUser.getIdToken().then((token) => {
             setToken(token);
+            localStorage.setItem('read-ease-token', token);
+            localStorage.setItem('read-ease-uid', uid);
             });
         }
 

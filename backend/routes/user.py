@@ -1,10 +1,14 @@
 # text_processing.py
 from flask import Blueprint, request, jsonify
 
-from utils.decorators import authorization_required
+from utils.decorators import authorization_required, async_authorization_required
 
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
+
+import os
+
+import json
 
 
 user_bp = Blueprint("user", __name__)
@@ -18,14 +22,10 @@ def get_mongo_client():
 
 
 @user_bp.route("/add_document", methods=["POST"])
-@authorization_required()
+@async_authorization_required()
 async def add_document():
     data = request.get_json()
-    text = data["text"]
     user_id = data["uid"]
-    keywords = data["keywords"]
-    sentences = data["sentences"]
-    title = data["title"]
 
     mong_client = get_mongo_client()
 
@@ -33,22 +33,22 @@ async def add_document():
     collection = db.get_collection("documents")
 
     document = {
-        "text": text,
+        "title": "Untitled Document",
+        "text": "",
         "user_id": user_id,
-        "keywords": keywords,
-        "sentences": sentences,
+        "keywords": [],
+        "sentences": [],
     }
 
     result = await collection.insert_one(document)
 
-    if not text:
-        return jsonify({"error": "No text provided"}), 400
+    print(result)
 
-    return jsonify(result)
+    return jsonify({"document_id": str(50)}), 200
 
 
-@user_bp.route("/add_document", methods=["POST"])
-@authorization_required()
+@user_bp.route("/get_documents", methods=["POST"])
+@async_authorization_required()
 async def get_documents():
     data = request.get_json()
     user_id = data["uid"]
@@ -60,11 +60,11 @@ async def get_documents():
 
     documents = await collection.find({"user_id": user_id}).to_list(length=None)
 
-    return jsonify(documents)
+    return json.loads(json.dumps(documents, default=str))
 
 
 @user_bp.route("/delete_document", methods=["POST"])
-@authorization_required()
+@async_authorization_required()
 async def delete_document():
     data = request.get_json()
     user_id = data["uid"]
@@ -81,7 +81,7 @@ async def delete_document():
 
 
 @user_bp.route("/change_document_title", methods=["POST"])
-@authorization_required()
+@async_authorization_required()
 async def change_document_title():
     data = request.get_json()
     user_id = data["uid"]
@@ -95,6 +95,66 @@ async def change_document_title():
 
     result = await collection.update_one(
         {"user_id": user_id, "_id": document_id}, {"$set": {"title": title}}
+    )
+
+    return jsonify(result)
+
+
+@user_bp.route("/change_document_text", methods=["POST"])
+@async_authorization_required()
+async def change_document_text():
+    data = request.get_json()
+    user_id = data["uid"]
+    document_id = data["document_id"]
+    text = data["text"]
+
+    mong_client = get_mongo_client()
+
+    db = mong_client.get_database("readEase")
+    collection = db.get_collection("documents")
+
+    result = await collection.update_one(
+        {"user_id": user_id, "_id": document_id}, {"$set": {"text": text}}
+    )
+
+    return jsonify(result)
+
+
+@user_bp.route("/change_document_keywords", methods=["POST"])
+@async_authorization_required()
+async def change_document_keywords():
+    data = request.get_json()
+    user_id = data["uid"]
+    document_id = data["document_id"]
+    keywords = data["keywords"]
+
+    mong_client = get_mongo_client()
+
+    db = mong_client.get_database("readEase")
+    collection = db.get_collection("documents")
+
+    result = await collection.update_one(
+        {"user_id": user_id, "_id": document_id}, {"$set": {"keywords": keywords}}
+    )
+
+    return jsonify(result)
+
+
+@user_bp.route("/change_document_sentences", methods=["POST"])
+@async_authorization_required()
+async def change_document_sentences():
+    data = request.get_json()
+    user_id = data["uid"]
+    document_id = data["document_id"]
+    sentences = data["sentences"]
+
+    mong_client = get_mongo_client()
+
+    db = mong_client.get_database("readEase")
+    collection = db.get_collection("documents")
+
+    result = await collection.update_one(
+        {"user_id": user_id, "_id": document_id}, {"$set": {"sentences": sentences}}
     )
 
     return jsonify(result)

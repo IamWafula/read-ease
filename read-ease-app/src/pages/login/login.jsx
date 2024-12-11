@@ -13,6 +13,8 @@ export default function Login (){
             const token = credential.accessToken;
             // The signed-in user info.
             const user = result.user;
+
+            
             // IdP data available using getAdditionalUserInfo(result)
             // ...
         }).catch((error) => {

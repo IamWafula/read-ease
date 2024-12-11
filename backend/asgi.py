@@ -12,7 +12,9 @@ from flask_limiter.util import get_remote_address
 
 from flask_sqlalchemy import SQLAlchemy
 
+# blueprint imports
 from routes.text_processing import text_processing_bp
+from routes.user import user_bp
 from routes.main import main_bp
 
 from dotenv import load_dotenv
@@ -24,7 +26,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app, supports_credentials=True)
+    CORS(app)
 
     limiter = Limiter(
         app,
@@ -32,7 +34,9 @@ def create_app():
     )
 
     # Register the blueprint for text processing
-    app.register_blueprint(text_processing_bp)
+    app.register_blueprint(user_bp, url_prefix="/user")
+
+    app.register_blueprint(text_processing_bp, url_prefix="/text-processing")
 
     return app
 
