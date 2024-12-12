@@ -55,8 +55,6 @@ const Highlight = ({
     const normalizedAngle = constrainedAngle - 15; // Offset by start of arc
     return (normalizedAngle / 330).toFixed(2); // Scale to [0, 1]
   };
-  
-  
 
 
   const describeArc = (x, y, radius, startAngle, endAngle) => {
@@ -130,6 +128,10 @@ const handleMouseDown = (event) => {
 
   return (
     <div id="body" onClick={(e) => e.stopPropagation()}>
+      {console.log('Rendering Highlight.jsx')}
+      {console.log('Current circles:', circles)}
+      {console.log('Current activeCircle:', activeCircle)}
+  
       <div className="highlight-container">
         {circles.map((circle, index) => (
           <div
@@ -139,6 +141,34 @@ const handleMouseDown = (event) => {
             onClick={(e) => {
               e.stopPropagation();
               handleCircleClick(index);
+  
+              // Trigger highlight when a circle is clicked
+              chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length === 0) {
+                  console.error('No active tab found.');
+                  return;
+                }
+  
+                const message = {
+                  action: 'highlightWords',
+                  color: circles[index]?.color || '#FFFF00', // Default to yellow if undefined
+                  opacity: globalOpacity,
+                };
+  
+                console.log('Sending message to content script:', message);
+  
+                chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
+                  if (chrome.runtime.lastError) {
+                    console.error('Error sending message:', chrome.runtime.lastError.message);
+                  } else {
+                    console.log('Response from content script:', response);
+                  }
+                });
+              });
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              handleDoubleClick(index); // Double click for toggling color picker
             }}
           >
             <img
@@ -156,7 +186,8 @@ const handleMouseDown = (event) => {
             />
           </div>
         ))}
-      </div>
+      </div>  
+
 
       <svg
         ref={sliderRef}
@@ -211,7 +242,7 @@ const handleMouseDown = (event) => {
         })()}
     </svg>
 
-      <button id="highlight" className="highlight-button"
+      {/* <button id="highlight" className="highlight-button"
         onClick={() => {
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             chrome.tabs.sendMessage(tabs[0].id, {
@@ -223,7 +254,7 @@ const handleMouseDown = (event) => {
         }}
       >
         Highlight
-      </button>        
+      </button>         */}
     </div>
   );
 };

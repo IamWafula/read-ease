@@ -2,6 +2,8 @@
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
+console.log('Content script loaded.');
+
 const styleSheet = document.createElement("style");
 document.head.appendChild(styleSheet);
 
@@ -10,7 +12,6 @@ function getWikipediaText() {
     console.log('in getWikipediaText', text);
     return text;
 }
-
 
 // function for highlights
 function updateHighlightStyle(color) {

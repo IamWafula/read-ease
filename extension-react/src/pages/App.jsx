@@ -6,13 +6,14 @@ import Login from './login.jsx';
 import Highlight from './highlight.jsx';
 
 function App() {
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [activeCircle, setActiveCircle] = useState(null);
   const [circles, setCircles] = useState([
-    { color: '#FFD700', isColorPickerOpen: false }
-  ]);
+        { color: '#FFD700', isColorPickerOpen: false }
+    ]);
 
   // Auth effect
   useEffect(() => {
@@ -26,6 +27,36 @@ function App() {
 
   // Event handlers
   const handleCircleClick = (index) => {
+    console.log('Single click detected for highlighting:', index);
+
+    // Highlight the text with a single click
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) {
+        console.error('No active tab found.');
+        return;
+      }
+
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: 'highlightWords',
+        color: circles[index].color, // Use the clicked circle's color
+        opacity: globalOpacity, // Use the global opacity
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Error sending message:', chrome.runtime.lastError.message);
+        } else {
+          console.log('Response from content script:', response);
+        }
+      });
+    });
+
+    // Set the active circle index
+    setActiveCircle(index);
+  };
+
+  const handleDoubleClick = (index) => {
+    console.log('Double click detected for toggling color picker:', index);
+
+    // Update the circles state to toggle the color picker for the double-clicked circle
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
@@ -34,7 +65,6 @@ function App() {
         return { ...circle, isColorPickerOpen: false };
       })
     );
-    setActiveCircle(index);
   };
 
   const handleColorChange = (index, color) => {
