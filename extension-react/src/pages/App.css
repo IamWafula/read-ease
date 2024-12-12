@@ -65,21 +65,6 @@ h1 {
   box-shadow: 0 0 8px rgba(255, 223, 186, 0.6);
 }
 
-.highlight-circle[data-color="#FF69B4"] {
-  background-color: #FFE0EB; /* Soft pastel pink */
-  box-shadow: 0 0 8px rgba(255, 182, 193, 0.6);
-}
-
-.highlight-circle[data-color="#8A2BE2"] {
-  background-color: #E9D6FF; /* Soft pastel purple */
-  box-shadow: 0 0 8px rgba(160, 130, 235, 0.6);
-}
-
-.highlight-circle[data-color="#40E0D0"] {
-  background-color: #D9FFF6; /* Soft pastel turquoise */
-  box-shadow: 0 0 8px rgba(128, 224, 200, 0.6);
-}
-
 /* Glowing effect on hover */
 .highlight-circle:hover {
   transform: scale(1.1);
@@ -103,6 +88,38 @@ h1 {
   border: none;
   cursor: pointer;
 }
+
+
+
+/* Circular opacity slider */
+/* Style for the circular slider container */
+.highlight-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Style for the movable handle (circle button) */
+.indicator-circle {
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* Style the opacity slider */
@@ -141,4 +158,34 @@ h1 {
 /* Hover effect for thumb */
 .custom-opacity-slider:hover {
   opacity: 1;
+}
+
+
+/* App.css */
+#body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+}
+
+.highlight-container {
+  position: relative;
+}
+
+.highlight-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.custom-opacity-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
