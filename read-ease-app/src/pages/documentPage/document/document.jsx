@@ -7,16 +7,16 @@ export default function Document() {
   const [highlightColor, setHighlightColor] = useState('#FFFF00'); // Default: Yellow
   const [highlightOpacity, setHighlightOpacity] = useState(1); // Default: Fully opaque
   const [boldColor, setBoldColor] = useState('#FF0000'); // Default: Red
-
+  const [docTitle, setDocTitle] = useState('Untitled Document'); // Default: Untitled Document
+  const [isProcessing, setIsProcessing] = useState(false); // Track processing state
+  const [errorMessage, setErrorMessage] = useState('');
+  
   const editableBoxRef = useRef(null); // Reference to the contentEditable box
 
   const saveCaretPosition = () => {
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);
-    return {
-      range,
-      selection,
-    };
+    return { range, selection };
   };
 
   const restoreCaretPosition = (caretData) => {
@@ -27,22 +27,21 @@ export default function Document() {
 
   const handleProcessText = async () => {
     if (!inputText.trim()) {
-      alert('Please paste some text to process.');
+      setErrorMessage('Please paste some text to process.');
       return;
     }
+
+    setErrorMessage(''); // Reset any previous error message
+    setIsProcessing(true);
 
     try {
       const response = await fetch('http://127.0.0.1:5000/process-text', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to process text');
-      }
+      if (!response.ok) throw new Error('Failed to process text');
 
       const data = await response.json();
       setKeywords(data.keywords || []);
@@ -50,13 +49,14 @@ export default function Document() {
       applyHighlighting(data.keywords, data.sentences);
     } catch (error) {
       console.error('Error processing text:', error);
-      alert('There was an error processing the text.');
+      setErrorMessage('There was an error processing the text.');
+    } finally {
+      setIsProcessing(false); // Reset loading state
     }
   };
 
   const applyHighlighting = (keywords, sentences) => {
     const caretData = saveCaretPosition();
-
     const editableBox = editableBoxRef.current;
     let content = editableBox.innerText;
 
@@ -88,37 +88,48 @@ export default function Document() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-2xl font-bold">Paste Your Text</h1>
+    <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
+      {/* Document Title Input */}
+      <div className="flex flex-col gap-2">
+        <input
+          type="text"
+          value={docTitle}
+          onChange={(e) => setDocTitle(e.target.value)}
+          className="p-2 border border-gray-300 rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Untitled Document"
+        />
+      </div>
 
       {/* Editable Box */}
       <div
-        id="editable-box"
         ref={editableBoxRef}
         contentEditable="true"
         suppressContentEditableWarning={true}
-        className="w-full p-2 border border-gray-300 rounded overflow-y-auto"
+        className="w-full max-w-4xl p-4 border-2 border-gray-300 rounded-lg bg-white shadow-lg resize-y overflow-auto mb-6"
         style={{
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
-          resize: 'both',
-          minHeight: '150px',
+          minHeight: '200px',
         }}
         onInput={handleInputChange}
       ></div>
 
+      {/* Error Message */}
+      {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
+
       {/* Customization Controls */}
-      <div className="flex gap-4">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="flex flex-col">
-          <label className="font-bold">Highlight Color</label>
+          <label className="font-semibold text-gray-800 mb-2">Highlight Color</label>
           <input
             type="color"
             value={highlightColor}
             onChange={(e) => setHighlightColor(e.target.value)}
+            className="w-16 h-16 border rounded-lg p-1"
           />
         </div>
         <div className="flex flex-col">
-          <label className="font-bold">Highlight Opacity</label>
+          <label className="font-semibold text-gray-800 mb-2">Highlight Opacity</label>
           <input
             type="range"
             min="0.1"
@@ -126,14 +137,16 @@ export default function Document() {
             step="0.1"
             value={highlightOpacity}
             onChange={(e) => setHighlightOpacity(e.target.value)}
+            className="w-full"
           />
         </div>
         <div className="flex flex-col">
-          <label className="font-bold">Bold Color</label>
+          <label className="font-semibold text-gray-800 mb-2">Bold Color</label>
           <input
             type="color"
             value={boldColor}
             onChange={(e) => setBoldColor(e.target.value)}
+            className="w-16 h-16 border rounded-lg p-1"
           />
         </div>
       </div>
@@ -141,10 +154,13 @@ export default function Document() {
       {/* Process Button */}
       <button
         onClick={handleProcessText}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        disabled={isProcessing}
+        className="px-6 py-3 bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors duration-200"
       >
-        Process Text
+        {isProcessing ? 'Processing...' : 'Process Text'}
       </button>
     </div>
   );
 }
+
+
