@@ -106,6 +106,7 @@ function App() {
       circles={circles}
       setCircles={setCircles}
       handleCircleClick={handleCircleClick}
+      handleDoubleClick={handleDoubleClick}
       handleColorChange={handleColorChange}
       handleOpacityChange={handleOpacityChange}
       hexToRgba={hexToRgba}

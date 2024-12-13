@@ -9,6 +9,7 @@ const Highlight = ({
   circles,
   setCircles,
   handleCircleClick,
+  handleDoubleClick,
   handleColorChange,
   handleOpacityChange,
   hexToRgba
