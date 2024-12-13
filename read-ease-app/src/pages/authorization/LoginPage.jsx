@@ -2,16 +2,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, provider } from './firebase';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
 import { clientId } from './config';
 
 export default function LoginPage() {
-  const navigate = useNavigate();
 
   // State to hold form data and errors
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
   // Handle email/password form submission
   const handleEmailPasswordLogin = async (e) => {
@@ -23,26 +23,27 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      // Replace with your actual login API request
-      const response = await fetch('http://127.0.0.1:5000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const auth = getAuth();
 
-      if (response.ok) {
-        // Redirect to the dashboard or main page after successful login
-        navigate('/');
-      } else {
-        // Handle incorrect login credentials
-        setErrorMessage('Invalid email or password');
-      }
+    try {
+      // Sign in the user with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Retrieve the Firebase ID token
+      const idToken = await user.getIdToken();
+
+      console.log('Login successful:', user);
+      console.log('ID Token:', idToken);
+
+      // Save the ID token and use it for API requests
+      localStorage.setItem('idToken', idToken);
+
+      // Redirect after login
+      navigate('/');
     } catch (error) {
-      console.error('Error during login:', error);
-      setErrorMessage('Something went wrong. Please try again later.');
+      console.error('Error during email/password login:', error.message);
+      setErrorMessage('Login failed. Please check your email and password.');
     }
   };
 
