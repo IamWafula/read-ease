@@ -1,6 +1,5 @@
 // highlight.jsx
 import React, { useState, useRef } from 'react';
-import './progress.css'
 
 const Highlight = ({
   globalOpacity,
@@ -130,138 +129,125 @@ const Highlight = ({
 
   const [loading, setLoading] = useState(false); // Loading state
 
+    return ( 
+      <div id="body" onClick={(e) => e.stopPropagation()}>
+        {console.log('Rendering Highlight.jsx')}
+        {console.log('Current circles:', circles)}
+        {console.log('Current activeCircle:', activeCircle)}
+        
+        <div className="parent-container">
+          <div className="highlight-opacity-container">
+            <svg
+              ref={sliderRef}
+              width="120"
+              height="120"
+              viewBox="0 0 100 100"
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+            >
+              <defs>
+                <linearGradient id="opacityGradient" gradientUnits="objectBoundingBox">
+                  <stop offset="0%" stopColor="rgba(0, 0, 0, 0)" />
+                  <stop offset="100%" stopColor="rgba(0, 0, 0, 1)" />
+                </linearGradient>
+              </defs>
 
+              <path
+                d={describeArc(50, 50, 45, 15, 15 + globalOpacity * 330)}
+                stroke="darkgray"
+                strokeWidth="10"
+                strokeLinecap="round"
+                fill="none"
+              />
 
-  return (
-    <div id="body" onClick={(e) => e.stopPropagation()}>
-      {console.log('Rendering Highlight.jsx')}
-      {console.log('Current circles:', circles)}
-      {console.log('Current activeCircle:', activeCircle)}
-  
-      <div className="highlight-container">
-        {circles.map((circle, index) => (
-          <div
-            key={index}
-            className={`highlight-circle ${activeCircle === index ? 'selected' : ''}`}
-            style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setLoading(true); // Start loading
-              handleCircleClick(index);
-              console.log('Circle clicked');
+              <path
+                d={describeArc(50, 50, 45, 15 + globalOpacity * 330, 345)}
+                stroke="#d3d3d3"
+                strokeWidth="10"
+                strokeLinecap="round"
+                fill="none"
+              />
 
-  
-              // Trigger highlight when a circle is clicked
-              chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length === 0) {
-                  console.error('No active tab found.');
-                  setLoading(false); // Hide progress bar
-                  return;
-                }
-  
-                const message = {
-                  action: 'highlightWords',
-                  color: circles[index]?.color || '#FFFF00', // Default to yellow if undefined
-                  opacity: globalOpacity,
-                };
-  
-                console.log('Sending message to content script:', message);
-  
-                chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
-                  if (chrome.runtime.lastError) {
-                    console.error('Error sending message:', chrome.runtime.lastError.message);
-                  } else {
-                    console.log('Response from content script:', response);
-                  }
+              {(() => {
+                const position = getIndicatorPosition(45, globalOpacity);
+                return (
+                  <circle
+                    cx={position.x}
+                    cy={position.y}
+                    r="5"
+                    fill="white"
+                    style={{ cursor: "pointer" }}
+                    onMouseDown={handleMouseDown}
+                  />
+                );
+              })()}
+            </svg>
 
-                  if (response?.status === "highlighted") {
-                    console.log('Highlighting complete, hiding progress bar');
-                    setLoading(false); // Hide progress bar after highlighting is complete
-                }
-                
-                });
-              });
-            }}
-            onDoubleClick={(e) => {
-              e.stopPropagation();
-              handleDoubleClick(index); // Double click for toggling color picker
-            }}
-          >
+            {circles.map((circle, index) => (
+              <div
+                key={index}
+                className={`highlight-circle ${activeCircle === index ? 'selected' : ''}`}
+                style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLoading(true);
+                  handleCircleClick(index);
+                  console.log('Circle clicked');
 
-            <input
-              type="color"
-              className="color-picker"
-              style={{ display: circle.isColorPickerOpen ? 'block' : 'none' }}
-              value={circle.color}
-              onChange={(e) => handleColorChange(index, e.target.value)}
-            />
+                  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    if (tabs.length === 0) {
+                      console.error('No active tab found.');
+                      setLoading(false);
+                      return;
+                    }
+
+                    const message = {
+                      action: 'highlightWords',
+                      color: circles[index]?.color || '#FFFF00',
+                      opacity: globalOpacity,
+                    };
+
+                    console.log('Sending message to content script:', message);
+
+                    chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
+                      if (chrome.runtime.lastError) {
+                        console.error('Error sending message:', chrome.runtime.lastError.message);
+                      } else {
+                        console.log('Response from content script:', response);
+                      }
+
+                      if (response?.status === "highlighted") {
+                        console.log('Highlighting complete, hiding progress bar');
+                        setLoading(false);
+                      }
+                    });
+                  });
+                }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleDoubleClick(index);
+                }}
+              >
+                <input
+                  type="color"
+                  className="color-picker"
+                  style={{ display: circle.isColorPickerOpen ? 'block' : 'none' }}
+                  value={circle.color}
+                  onChange={(e) => handleColorChange(index, e.target.value)}
+                />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>  
 
-
-      <svg
-        ref={sliderRef}
-        width="100"
-        height="100"
-        viewBox="0 0 100 100"
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        >
-        {/* Gradient Definition */}
-        <defs>
-            <linearGradient id="opacityGradient" gradientUnits="objectBoundingBox">
-            <stop offset="0%" stopColor="rgba(0, 0, 0, 0)" /> {/* Transparent */}
-            <stop offset="100%" stopColor="rgba(0, 0, 0, 1)" /> {/* Fully opaque */}
-            </linearGradient>
-        </defs>
-
-        {/* Covered Arc */}
-        <path
-            d={describeArc(50, 50, 45, 15, 15 + globalOpacity * 330)} // Dynamic arc
-            stroke="darkgray" // Slightly darker shade for covered part
-            strokeWidth="10"
-            strokeLinecap="round"
-            fill="none"
-        />
-
-        {/* Remaining Arc */}
-        <path
-            d={describeArc(50, 50, 45, 15 + globalOpacity * 330, 345)} // Dynamic arc
-            stroke="#d3d3d3" // Pale elephant gray for remaining part
-            strokeWidth="10"
-            strokeLinecap="round"
-            fill="none"
-        />
-
-        {/* Handle (Movable Indicator) */}
-        {(() => {
-            const position = getIndicatorPosition(45, globalOpacity);
-            return (
-            <circle
-                cx={position.x}
-                cy={position.y}
-                r="5"
-                fill="white"
-                stroke="black"
-                strokeWidth="2"
-                style={{ cursor: "pointer" }}
-                onMouseDown={handleMouseDown}
-            />
-            );
-        })()}
-    </svg>
-
-      {/* Progress Bar */}
-      {loading && (
-        <div className="progress-bar">
-          <div className="progress-bar-indeterminate"></div>
+          {loading && (
+            <div className="progress-bar">
+              <div className="progress-bar-indeterminate"></div>
+            </div>
+          )}
         </div>
-      )}
-
-    </div>
-  );
-};
+        </div>
+      );
+    };
 
 export default Highlight;
