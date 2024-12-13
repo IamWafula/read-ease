@@ -14,6 +14,8 @@ function App() {
   const [circles, setCircles] = useState([
         { color: '#FFD700', isColorPickerOpen: false }
     ]);
+  const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
+
 
   // Auth effect
   useEffect(() => {
@@ -76,6 +78,10 @@ function App() {
         return circle;
       })
     );
+
+    if (activeCircle === index) {
+      setProgressBarColor(color);
+    }
   };
   
   const handleOpacityChange = (event) => {
@@ -110,6 +116,7 @@ function App() {
       handleColorChange={handleColorChange}
       handleOpacityChange={handleOpacityChange}
       hexToRgba={hexToRgba}
+      progressBarColor={progressBarColor}
     />
   );
 }

@@ -12,7 +12,8 @@ const Highlight = ({
   handleDoubleClick,
   handleColorChange,
   handleOpacityChange,
-  hexToRgba
+  hexToRgba,
+  progressBarColor
 }) => {
   
   const sliderRef = useRef(null);
@@ -129,6 +130,7 @@ const Highlight = ({
 
   const [loading, setLoading] = useState(false); // Loading state
 
+
     return ( 
       <div id="body" onClick={(e) => e.stopPropagation()}>
         {console.log('Rendering Highlight.jsx')}
@@ -242,7 +244,10 @@ const Highlight = ({
 
           {loading && (
             <div className="progress-bar">
-              <div className="progress-bar-indeterminate"></div>
+              <div 
+              className="progress-bar-indeterminate"
+              style={{ backgroundColor: progressBarColor }}
+              ></div>
             </div>
           )}
         </div>
