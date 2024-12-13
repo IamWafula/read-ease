@@ -15,9 +15,10 @@ function App() {
         { color: '#FFD700', isColorPickerOpen: false }
     ]);
   const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
+  const [progressLoading, setProgressLoading] = useState(false);
 
 
-  // Auth effect
+  // Authentication (State + Effect)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log('Auth state changed, currentUser:', currentUser);
@@ -27,33 +28,43 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Login />;
+
   // Event handlers
   const handleCircleClick = (index) => {
-    console.log('Single click detected for highlighting:', index);
-
-    // Highlight the text with a single click
+    setProgressLoading(true); // Show the progress bar
+    
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
         console.error('No active tab found.');
+        setProgressLoading(false); // Hide the progress bar on error
         return;
       }
-
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: 'highlightWords',
-        color: circles[index].color, // Use the clicked circle's color
-        opacity: globalOpacity, // Use the global opacity
-      }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('Error sending message:', chrome.runtime.lastError.message);
-        } else {
-          console.log('Response from content script:', response);
+  
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: 'highlightWords', color: circles[index].color, opacity: globalOpacity },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Error sending message:', chrome.runtime.lastError.message);
+            setProgressLoading(false); // Hide the progress bar on error
+          } else {
+            console.log('Response from content script:', response);
+          }
+  
+          // Hide the progress bar if the highlighting is complete
+          if (response?.status === "highlighted") {
+            console.log('Highlighting complete, hiding progress bar');
+            setProgressLoading(false);
+          }
         }
-      });
+      );
     });
-
-    // Set the active circle index
-    setActiveCircle(index);
+  
+    setActiveCircle(index); // Set the active circle
   };
+  
 
   const handleDoubleClick = (index) => {
     console.log('Double click detected for toggling color picker:', index);
@@ -88,35 +99,20 @@ function App() {
     setGlobalOpacity(event.target.value);
   };
 
-  const hexToRgba = (hex, opacity) => {
-    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
-    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
-  };
 
-  // Loading state
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  // Not logged in
-  if (!user) {
-    return <Login />;
-  }
 
   return (
     <Highlight
       globalOpacity={globalOpacity}
       setGlobalOpacity={setGlobalOpacity}
       activeCircle={activeCircle}
-      setActiveCircle={setActiveCircle}
       circles={circles}
-      setCircles={setCircles}
       handleCircleClick={handleCircleClick}
       handleDoubleClick={handleDoubleClick}
       handleColorChange={handleColorChange}
       handleOpacityChange={handleOpacityChange}
-      hexToRgba={hexToRgba}
       progressBarColor={progressBarColor}
+      progressLoading={progressLoading}
     />
   );
 }

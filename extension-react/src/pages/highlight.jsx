@@ -5,37 +5,33 @@ const Highlight = ({
   globalOpacity,
   setGlobalOpacity,
   activeCircle,
-  setActiveCircle,
   circles,
-  setCircles,
   handleCircleClick,
   handleDoubleClick,
   handleColorChange,
   handleOpacityChange,
-  hexToRgba,
-  progressBarColor
+  progressBarColor,
+  progressLoading
 }) => {
   
+  //opacity slider
+
   const sliderRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [lastAngle, setLastAngle] = useState(null);
 
   const calculateAngle = (event) => {
     if (!sliderRef.current) return 0;
-  
     const rect = sliderRef.current.getBoundingClientRect();
     const center = {
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
     };
-  
     // Calculate the raw angle
     let angle = Math.atan2(event.clientY - center.y, event.clientX - center.x) * (180 / Math.PI);
     angle = (angle + 90) % 360; // Normalize to 0-360
-  
     // Adjust for wrapping angles
     if (angle < 15) angle += 360;
-  
     // Determine movement direction
     if (lastAngle !== null) {
       if (angle > lastAngle && angle - lastAngle > 180) {
@@ -46,19 +42,15 @@ const Highlight = ({
         angle = Math.min(angle, 345);
       }
     }
-  
     // Clamp angle within 15° to 345°
     const constrainedAngle = Math.min(Math.max(angle, 15), 345);
-  
     // Update the last angle for direction tracking
     setLastAngle(constrainedAngle);
-  
     // Map the constrained angle to opacity (0–1)
     const normalizedAngle = constrainedAngle - 15; // Offset by start of arc
     return (normalizedAngle / 330).toFixed(2); // Scale to [0, 1]
   };
-
-
+  
   const describeArc = (x, y, radius, startAngle, endAngle) => {
     const start = polarToCartesian(x, y, radius, endAngle);
     const end = polarToCartesian(x, y, radius, startAngle);
@@ -88,47 +80,22 @@ const Highlight = ({
     return polarToCartesian(50, 50, radius, angle);
   };
 
-
-  const handleMouseUp = () => setIsDragging(false);
-
+  const handleMouseDown = () => setIsDragging(true);
   const handleMouseMove = (event) => {
-    if (!isDragging) return;
-
-    // Constrain the angle and calculate opacity
-    const newOpacity = calculateAngle(event);
-    setGlobalOpacity(newOpacity);
+    if (isDragging) setGlobalOpacity(calculateAngle(event));
   };
-
-  const handleMouseDown = (event) => {
-    setIsDragging(true);
-
-    // Constrain the angle and calculate opacity
-    const newOpacity = calculateAngle(event);
-    setGlobalOpacity(newOpacity);
-  };
+  const handleMouseUp = () => setIsDragging(false);
 
   React.useEffect(() => {
     const handleMouseUpOutside = () => setIsDragging(false);
-    document.addEventListener("mouseup", handleMouseUpOutside);
-    return () => document.removeEventListener("mouseup", handleMouseUpOutside);
+    document.addEventListener('mouseup', handleMouseUpOutside);
+    return () => document.removeEventListener('mouseup', handleMouseUpOutside);
   }, []);
-  
 
-  const handleClickOutside = () => {
-    setActiveCircle(null);
-    setCircles((prevCircles) =>
-      prevCircles.map((circle) => ({ ...circle, isColorPickerOpen: false }))
-    );
+    const hexToRgba = (hex, opacity) => {
+    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
   };
-
-  React.useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
-
-  const [loading, setLoading] = useState(false); // Loading state
 
 
     return ( 
@@ -191,45 +158,8 @@ const Highlight = ({
                 key={index}
                 className={`highlight-circle ${activeCircle === index ? 'selected' : ''}`}
                 style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLoading(true);
-                  handleCircleClick(index);
-                  console.log('Circle clicked');
-
-                  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                    if (tabs.length === 0) {
-                      console.error('No active tab found.');
-                      setLoading(false);
-                      return;
-                    }
-
-                    const message = {
-                      action: 'highlightWords',
-                      color: circles[index]?.color || '#FFFF00',
-                      opacity: globalOpacity,
-                    };
-
-                    console.log('Sending message to content script:', message);
-
-                    chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
-                      if (chrome.runtime.lastError) {
-                        console.error('Error sending message:', chrome.runtime.lastError.message);
-                      } else {
-                        console.log('Response from content script:', response);
-                      }
-
-                      if (response?.status === "highlighted") {
-                        console.log('Highlighting complete, hiding progress bar');
-                        setLoading(false);
-                      }
-                    });
-                  });
-                }}
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  handleDoubleClick(index);
-                }}
+                onClick={() => handleCircleClick(index)}
+                onDoubleClick={() => handleDoubleClick(index)}
               >
                 <input
                   type="color"
@@ -242,7 +172,7 @@ const Highlight = ({
             ))}
           </div>
 
-          {loading && (
+          {progressLoading && (
             <div className="progress-bar">
               <div 
               className="progress-bar-indeterminate"
