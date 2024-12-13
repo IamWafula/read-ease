@@ -1,5 +1,6 @@
-// Highlight.jsx
+// highlight.jsx
 import React, { useState, useRef } from 'react';
+import './progress.css'
 
 const Highlight = ({
   globalOpacity,
@@ -90,21 +91,21 @@ const Highlight = ({
 
   const handleMouseUp = () => setIsDragging(false);
 
-const handleMouseMove = (event) => {
-  if (!isDragging) return;
+  const handleMouseMove = (event) => {
+    if (!isDragging) return;
 
-  // Constrain the angle and calculate opacity
-  const newOpacity = calculateAngle(event);
-  setGlobalOpacity(newOpacity);
-};
+    // Constrain the angle and calculate opacity
+    const newOpacity = calculateAngle(event);
+    setGlobalOpacity(newOpacity);
+  };
 
-const handleMouseDown = (event) => {
-  setIsDragging(true);
+  const handleMouseDown = (event) => {
+    setIsDragging(true);
 
-  // Constrain the angle and calculate opacity
-  const newOpacity = calculateAngle(event);
-  setGlobalOpacity(newOpacity);
-};
+    // Constrain the angle and calculate opacity
+    const newOpacity = calculateAngle(event);
+    setGlobalOpacity(newOpacity);
+  };
 
   React.useEffect(() => {
     const handleMouseUpOutside = () => setIsDragging(false);
@@ -127,6 +128,10 @@ const handleMouseDown = (event) => {
     };
   }, []);
 
+  const [loading, setLoading] = useState(false); // Loading state
+
+
+
   return (
     <div id="body" onClick={(e) => e.stopPropagation()}>
       {console.log('Rendering Highlight.jsx')}
@@ -141,12 +146,16 @@ const handleMouseDown = (event) => {
             style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
             onClick={(e) => {
               e.stopPropagation();
+              setLoading(true); // Start loading
               handleCircleClick(index);
+              console.log('Circle clicked');
+
   
               // Trigger highlight when a circle is clicked
               chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length === 0) {
                   console.error('No active tab found.');
+                  setLoading(false); // Hide progress bar
                   return;
                 }
   
@@ -164,6 +173,12 @@ const handleMouseDown = (event) => {
                   } else {
                     console.log('Response from content script:', response);
                   }
+
+                  if (response?.status === "highlighted") {
+                    console.log('Highlighting complete, hiding progress bar');
+                    setLoading(false); // Hide progress bar after highlighting is complete
+                }
+                
                 });
               });
             }}
@@ -172,12 +187,7 @@ const handleMouseDown = (event) => {
               handleDoubleClick(index); // Double click for toggling color picker
             }}
           >
-            <img
-              src="static/img/down_arrow.png"
-              className="arrow-icon"
-              alt="Dropdown Arrow"
-              style={{ display: activeCircle === index ? 'block' : 'none' }}
-            />
+
             <input
               type="color"
               className="color-picker"
@@ -243,19 +253,13 @@ const handleMouseDown = (event) => {
         })()}
     </svg>
 
-      {/* <button id="highlight" className="highlight-button"
-        onClick={() => {
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            chrome.tabs.sendMessage(tabs[0].id, {
-              action: 'highlightWords',              
-              color: circles[activeCircle].color,
-              opacity: globalOpacity,
-            });
-          });
-        }}
-      >
-        Highlight
-      </button>         */}
+      {/* Progress Bar */}
+      {loading && (
+        <div className="progress-bar">
+          <div className="progress-bar-indeterminate"></div>
+        </div>
+      )}
+
     </div>
   );
 };

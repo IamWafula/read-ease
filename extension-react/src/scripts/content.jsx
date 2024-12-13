@@ -187,15 +187,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 highlightWords(data.sentences);
                 const endTime = performance.now();
                 console.log(`Highlighting completed in ${(endTime - startTime).toFixed(2)}ms`);
+                sendResponse({ status: "highlighted" });
             }
 
             console.log(data);            
         }
 
-
         getKeywords(mainText);
                 
-        sendResponse({ status: "highlighted" });
     }
     return true;
 });
