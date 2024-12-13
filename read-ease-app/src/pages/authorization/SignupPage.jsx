@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth, provider } from './firebase';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider } from 'firebase/auth';
 
 export default function SignupPage() {
   // States for form fields
@@ -26,30 +28,38 @@ export default function SignupPage() {
       return;
     }
 
-    setError(''); // Clear error if everything is valid
+    const auth = getAuth();
     try {
-        // Replace with your actual signup API request
-        const response = await fetch('http://127.0.0.1:5000/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name, email, password, confirmPassword }),
-        });
-  
-        if (response.ok) {
-          // Redirect to the dashboard or main page after successful signup
-          navigate('/');
-        } else {
-          // Handle unsuccessful signup
-          const data = await response.json();
-          setError(data.message || 'Signup failed. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error during signup:', error);
-        setError('Something went wrong. Please try again later.');
+      // Create a new user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Update user profile to include their name
+      await updateProfile(user, { displayName: name });
+
+      // Retrieve the Firebase ID token
+      const idToken = await user.getIdToken();
+
+      console.log("Signup successful:", user);
+      console.log("ID Token:", idToken);
+
+      // Optionally, store ID token in localStorage or pass it to your backend
+      localStorage.setItem("idToken", idToken);
+
+      // Redirect to another page after signup
+      navigate('/');
+    } catch (error) {
+      console.error("Error during signup:", error.message);
+      // Check for specific error codes
+      if (error.code === 'auth/weak-password') {
+        setError("Password should be at least 6 characters long.");
+      } else if (error.code === 'auth/email-already-in-use') {
+        setError("Email is already in use. Please try logging in or use a different email.");
+      } else {
+        setError("Signup failed. Please try again later.");
       }
-    };
+    }
+  };
 
 
 

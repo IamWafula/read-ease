@@ -89,8 +89,8 @@ export default function MainPage() {
           <div className="w-64 bg-gray-800 text-white p-4">
             <h2 className="text-xl font-bold mb-4">Read-Ease</h2>
             <ul>
-              <li><Link to="/" className="hover:text-blue-300">My Read-Ease</Link></li>
-              <li><Link to="/account" className="hover:text-blue-300">Account</Link></li>
+              <li className="mb-4"><Link to="/" className="hover:text-blue-300">My Read-Ease</Link></li>
+              <li className="mb-4"><Link to="/account" className="hover:text-blue-300">Account</Link></li>
               <li><Link to="/signout" className="hover:text-blue-300">Signout</Link></li>
             </ul>
           </div>

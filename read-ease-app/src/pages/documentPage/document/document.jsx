@@ -7,6 +7,7 @@ export default function Document() {
   const [highlightColor, setHighlightColor] = useState('#FFFF00'); // Default: Yellow
   const [highlightOpacity, setHighlightOpacity] = useState(1); // Default: Fully opaque
   const [boldColor, setBoldColor] = useState('#FF0000'); // Default: Red
+  const [docTitle, setDocTitle] = useState('Untitled Document'); // Default: Untitled Document
 
   const editableBoxRef = useRef(null); // Reference to the contentEditable box
 
@@ -89,7 +90,16 @@ export default function Document() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-2xl font-bold">Paste Your Text</h1>
+      {/* Document Title Input */}
+      <div className="flex flex-col gap-2">
+        <input
+          type="text"
+          value={docTitle}
+          onChange={(e) => setDocTitle(e.target.value)}
+          className="p-2 border border-gray-300 rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Untitled Document"
+        />
+      </div>
 
       {/* Editable Box */}
       <div
