@@ -1,8 +1,8 @@
 // mainPage.jsx
 import React, { useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../authorization/firebase.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Login from '../authorization/LoginPage.jsx';
 
@@ -28,6 +28,7 @@ export default function MainPage() {
 
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const navigate = useNavigate(); // Hook for navigation
 
     const documents = [
         {
@@ -77,6 +78,17 @@ export default function MainPage() {
         return () => unsubscribe();
     }, []);
 
+    const handleSignOut = async () => {
+        try {
+          await signOut(auth); // Sign the user out
+          localStorage.removeItem('read-ease-token');
+          localStorage.removeItem('read-ease-uid');
+          navigate('/login'); // Redirect to the login page after sign-out
+        } catch (error) {
+          console.error("Error signing out:", error.message);
+        }
+      };
+
 
     if (!user) {
         return <Login />;
@@ -91,7 +103,7 @@ export default function MainPage() {
             <ul>
               <li className="mb-4"><Link to="/" className="hover:text-blue-300">My Read-Ease</Link></li>
               <li className="mb-4"><Link to="/account" className="hover:text-blue-300">Account</Link></li>
-              <li><Link to="/signout" className="hover:text-blue-300">Signout</Link></li>
+              <li><button onClick={handleSignOut} className="hover:text-blue-300">Sign out</button></li>
             </ul>
           </div>
     
