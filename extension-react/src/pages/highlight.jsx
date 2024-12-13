@@ -6,8 +6,7 @@ const Highlight = ({
   setGlobalOpacity,
   activeCircle,
   circles,
-  handleCircleClick,
-  handleDoubleClick,
+  handleClick,
   handleColorChange,
   handleOpacityChange,
   progressBarColor,
@@ -158,8 +157,7 @@ const Highlight = ({
                 key={index}
                 className={`highlight-circle ${activeCircle === index ? 'selected' : ''}`}
                 style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
-                onClick={() => handleCircleClick(index)}
-                onDoubleClick={() => handleDoubleClick(index)}
+                onClick={() => handleClick(index)}
               >
                 <input
                   type="color"

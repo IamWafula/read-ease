@@ -16,6 +16,7 @@ function App() {
     ]);
   const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
   const [progressLoading, setProgressLoading] = useState(false);
+  const [clickTimeout, setClickTimeout] = useState(null);
 
 
   // Authentication (State + Effect)
@@ -80,6 +81,20 @@ function App() {
     );
   };
 
+  const handleClick = (index) => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      setClickTimeout(null);
+      handleDoubleClick(index); // Handle double click
+    } else {
+      const timeout = setTimeout(() => {
+        handleCircleClick(index); // Handle single click
+        setClickTimeout(null);
+      }, 550);
+      setClickTimeout(timeout);
+    }
+  };
+
   const handleColorChange = (index, color) => {
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
@@ -107,8 +122,7 @@ function App() {
       setGlobalOpacity={setGlobalOpacity}
       activeCircle={activeCircle}
       circles={circles}
-      handleCircleClick={handleCircleClick}
-      handleDoubleClick={handleDoubleClick}
+      handleClick={handleClick}
       handleColorChange={handleColorChange}
       handleOpacityChange={handleOpacityChange}
       progressBarColor={progressBarColor}
