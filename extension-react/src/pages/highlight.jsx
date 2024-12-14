@@ -1,10 +1,10 @@
 // highlight.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const Highlight = ({
   globalOpacity,
   setGlobalOpacity,
-  activeCircle,
+  setCircles,
   circles,
   handleClick,
   handleColorChange,
@@ -78,7 +78,32 @@ const Highlight = ({
     // Convert angle to Cartesian coordinates
     return polarToCartesian(50, 50, radius, angle);
   };
+  
+  const hexToRgba = (hex, opacity) => {
+    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
+  };
 
+  // Color Palette
+
+  const colorOptions = ['#FF00A2','#FF0000', '#FF9000', '#FFC900', '#FFFF00', '#00FF00', '#00CFFF', '#9B00FF'];
+
+  // Handle outside click to close the speech bubble
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest(".speech-bubble") && !event.target.closest(".highlight-circle")) {
+        setCircles((prevCircles) =>
+          prevCircles.map((circle) => ({ ...circle, isSpeechBubbleOpen: false }))
+        );
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, []);
+  
   const handleMouseDown = () => setIsDragging(true);
   const handleMouseMove = (event) => {
     if (isDragging) setGlobalOpacity(calculateAngle(event));
@@ -91,17 +116,13 @@ const Highlight = ({
     return () => document.removeEventListener('mouseup', handleMouseUpOutside);
   }, []);
 
-    const hexToRgba = (hex, opacity) => {
-    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
-    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
-  };
+
 
 
     return ( 
       <div id="body" onClick={(e) => e.stopPropagation()}>
         {console.log('Rendering Highlight.jsx')}
         {console.log('Current circles:', circles)}
-        {console.log('Current activeCircle:', activeCircle)}
         
         <div className="parent-container">
           <div className="highlight-opacity-container">
@@ -154,18 +175,28 @@ const Highlight = ({
 
             {circles.map((circle, index) => (
               <div
-                key={index}
-                className={`highlight-circle ${activeCircle === index ? 'selected' : ''}`}
+                className={`highlight-circle selected`}
                 style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
-                onClick={() => handleClick(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClick(index);
+                }}
               >
-                <input
-                  type="color"
-                  className="color-picker"
-                  style={{ display: circle.isColorPickerOpen ? 'block' : 'none' }}
-                  value={circle.color}
-                  onChange={(e) => handleColorChange(index, e.target.value)}
-                />
+              {circle.isSpeechBubbleOpen && (
+                <div className="speech-bubble">
+                  {colorOptions.map((color, i) => (
+                    <div
+                      key={i}
+                      className="color-option"
+                      style={{ backgroundColor: color }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleColorChange(index, color);
+                      }} 
+                    ></div>
+                  ))}
+                </div>
+                )}
               </div>
             ))}
           </div>

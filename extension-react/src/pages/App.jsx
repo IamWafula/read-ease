@@ -10,13 +10,19 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
-  const [activeCircle, setActiveCircle] = useState(null);
   const [circles, setCircles] = useState([
         { color: '#FFD700', isColorPickerOpen: false }
     ]);
   const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
   const [progressLoading, setProgressLoading] = useState(false);
   const [clickTimeout, setClickTimeout] = useState(null);
+  const [lastHighlightSettings, setLastHighlightSettings] = useState({
+    color: null,
+    opacity: null,
+    pageUrl: null,
+    highlighted: false,
+  });
+
 
 
   // Authentication (State + Effect)
@@ -34,8 +40,15 @@ function App() {
 
   // Event handlers
   const handleCircleClick = (index) => {
+    const currentColor = circles[0].color;
+    const currentOpacity = globalOpacity;
+  
+    if (lastHighlightSettings.color === currentColor && lastHighlightSettings.opacity === currentOpacity) {
+      console.log('Highlight skipped: Settings unchanged.');
+      return;
+    }
+
     setProgressLoading(true); // Show the progress bar
-    
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
         console.error('No active tab found.');
@@ -61,9 +74,8 @@ function App() {
           }
         }
       );
+      setLastHighlightSettings({ color: currentColor, opacity: currentOpacity });
     });
-  
-    setActiveCircle(index); // Set the active circle
   };
   
 
@@ -74,14 +86,15 @@ function App() {
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
-          return { ...circle, isColorPickerOpen: !circle.isColorPickerOpen };
+          return { ...circle, isSpeechBubbleOpen: !circle.isSpeechBubbleOpen };
         }
-        return { ...circle, isColorPickerOpen: false };
+        return { ...circle, isSpeechBubbleOpen: false };
       })
     );
   };
 
   const handleClick = (index) => {
+
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       setClickTimeout(null);
@@ -96,18 +109,16 @@ function App() {
   };
 
   const handleColorChange = (index, color) => {
+
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
-          return { ...circle, color };
+          return { ...circle, color, isSpeechBubbleOpen: false };
         }
         return circle;
-      })
-    );
+      }));
 
-    if (activeCircle === index) {
       setProgressBarColor(color);
-    }
   };
   
   const handleOpacityChange = (event) => {
@@ -120,7 +131,7 @@ function App() {
     <Highlight
       globalOpacity={globalOpacity}
       setGlobalOpacity={setGlobalOpacity}
-      activeCircle={activeCircle}
+      setCircles={setCircles}
       circles={circles}
       handleClick={handleClick}
       handleColorChange={handleColorChange}

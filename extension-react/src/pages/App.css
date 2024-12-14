@@ -62,6 +62,38 @@ body {
   z-index: 1;
 }
 
+/* Color Palette Styles */
+.speech-bubble {
+  position: absolute;
+  bottom: -80px; /* Adjust to ensure it's below the circle */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping to create rows */
+  justify-content: center;
+  gap: 10px; /* Space between the color circles */
+  width: 120px; /* Fixed width to fit two rows of 4 circles */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-option {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.2);
+}
+
+
+
 /* Progress Bar Styles */
 .progress-bar {
   position: relative;
