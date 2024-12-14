@@ -14,14 +14,28 @@ function getWikipediaText() {
 }
 
 // function for highlights
-function updateHighlightStyle(color) {
+function updateHighlightStyle(color, opacity) {
     return `
         .read-ease-highlight {
-            background-color: ${color};
+            background-color: ${color} !important;
+            opacity: ${opacity} !important;
             border-radius: 2px;
         }
     `;
 }
+
+function applyHighlightStyles(color, opacity) {
+    console.log('Updating highlight styles...');
+    const styleContent = `
+        .read-ease-highlight {
+            background-color: ${color} !important;
+            opacity: ${opacity} !important;
+        }
+    `;
+    styleSheet.textContent = styleContent;
+    console.log(`Highlight styles updated to color: ${color}, opacity: ${opacity}`);
+}
+
 
 
 function highlightWords(phrases) {
@@ -159,17 +173,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
         // TODO: Implement this function
         const color = request.color || 'yellow';  // Default to yellow if no color provided
+        const opacity = request.opacity || 1;
         styleSheet.textContent = updateHighlightStyle(color);  // Update global style
-        const opacity = request.opacity;
 
-        var currentUrl = window.location.href;
-        var mainText = null;
+        const currentUrl = window.location.href;
+        let mainText = null;
 
-        async function getKeywords(){
+        (async function getKeywords() {
 
             if (currentUrl.includes("wikipedia.org")) {
-                // run the wikipedia script
-                mainText = getWikipediaText();                            
+                // Get text from Wikipedia page
+                mainText = getWikipediaText();
+            } else {
+                // For other pages, implement your own text extraction
+                mainText = document.body.innerText;
             }
 
             const response = await fetch('http://127.0.0.1:5000/process-text', {
@@ -191,10 +208,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             console.log(data);            
-        }
+        })();
 
-        getKeywords(mainText);
-                
+        return true;
+
+    } else if (request.action === "applyHighlightStyles") {
+        const color = request.color || 'yellow';  // Default to yellow if no color provided
+        const opacity = request.opacity || 1;
+
+        // Update global style to change the highlight color and opacity
+        styleSheet.textContent = updateHighlightStyle(color, opacity);
+
+        console.log('Highlight styles updated.');
+        sendResponse({ status: "styles_updated" });
+
+        // No need to keep the listener alive for asynchronous response
+        return false;
     }
-    return true;
 });

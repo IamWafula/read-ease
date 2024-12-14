@@ -24,7 +24,6 @@ function App() {
   });
 
 
-
   // Authentication (State + Effect)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -42,42 +41,91 @@ function App() {
   const handleCircleClick = (index) => {
     const currentColor = circles[0].color;
     const currentOpacity = globalOpacity;
-  
-    if (lastHighlightSettings.color === currentColor && lastHighlightSettings.opacity === currentOpacity) {
-      console.log('Highlight skipped: Settings unchanged.');
-      return;
-    }
 
-    setProgressLoading(true); // Show the progress bar
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
         console.error('No active tab found.');
         setProgressLoading(false); // Hide the progress bar on error
         return;
       }
-  
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: 'highlightWords', color: circles[index].color, opacity: globalOpacity },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error('Error sending message:', chrome.runtime.lastError.message);
-            setProgressLoading(false); // Hide the progress bar on error
-          } else {
-            console.log('Response from content script:', response);
+
+    const currentPageUrl = tabs[0].url;
+
+      // Check if the text is already highlighted on the same page
+      if (
+        lastHighlightSettings.highlighted &&
+        lastHighlightSettings.pageUrl === currentPageUrl
+      ) {
+        // If only the color or opacity has changed, update the highlight styles
+        if (
+          lastHighlightSettings.color !== currentColor ||
+          lastHighlightSettings.opacity !== currentOpacity
+        ) {
+          // Update the highlight styles without re-processing the text
+          console.log('Updating highlight styles...');
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            {
+              action: 'applyHighlightStyles',
+              color: currentColor,
+              opacity: currentOpacity,
+            },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                  console.error('Error sending message:', chrome.runtime.lastError.message);
+              } else if (response?.status === 'styles_updated') {
+                  console.log('Highlight styles updated successfully.');
+              } else {
+                  console.warn('Unexpected response:', response);
+              }
           }
-  
-          // Hide the progress bar if the highlighting is complete
-          if (response?.status === "highlighted") {
-            console.log('Highlighting complete, hiding progress bar');
-            setProgressLoading(false);
-          }
-        }
       );
-      setLastHighlightSettings({ color: currentColor, opacity: currentOpacity });
-    });
-  };
+
+      // Update last highlight settings
+      setLastHighlightSettings((prev) => ({
+          ...prev,
+          color: currentColor,
+          opacity: currentOpacity,
+      }));
+
+        } else {
+          // No changes, do nothing
+          console.log('Highlight skipped: Settings unchanged.');
+        }
+      } else {
+        // Proceed to highlight the text by processing it again
+          setProgressLoading(true);      
   
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error('Error sending message:', chrome.runtime.lastError.message);
+                setProgressLoading(false);
+                return; // Hide the progress bar on error
+              } 
+
+              // Hide the progress bar if the highlighting is complete
+              if (response?.status === 'highlighted') {
+                console.log('Highlighting complete, hiding progress bar');
+                setProgressLoading(false);
+              } else {
+                console.warn('Unexpected response:', response);
+                setProgressLoading(false); // Ensure progress bar is hidden in all cases
+              }
+            }
+          );
+
+          setLastHighlightSettings({
+            color: currentColor,
+            opacity: currentOpacity,
+            pageUrl: currentPageUrl,
+            highlighted: true,
+          });
+        }
+      });
+    };
 
   const handleDoubleClick = (index) => {
     console.log('Double click detected for toggling color picker:', index);
