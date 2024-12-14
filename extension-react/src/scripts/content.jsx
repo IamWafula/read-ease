@@ -6,7 +6,6 @@ document.head.appendChild(styleSheet);
 
 function getWikipediaText() {
     const text = document.getElementById("bodyContent").innerText;
-    console.log('in getWikipediaText', text);
     return text;
 }
 
