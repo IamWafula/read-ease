@@ -44,7 +44,7 @@ export default function SignupPage() {
       console.log("ID Token:", idToken);
 
       // Optionally, store ID token in localStorage or pass it to your backend
-      localStorage.setItem("idToken", idToken);
+      localStorage.setItem("read-ease-token", idToken);
 
       // Redirect to another page after signup
       navigate('/');

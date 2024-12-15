@@ -1,10 +1,10 @@
-// pages/accountPage/AccountPage.jsx
 import React, { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function AccountPage() {
   const [user, setUser] = useState({
-    username: 'JohnDoe',
-    email: 'johndoe@example.com',
+    username: '',
+    email: '',
     password: '',
   });
   const [editMode, setEditMode] = useState(false);
@@ -13,11 +13,18 @@ export default function AccountPage() {
   const [error, setError] = useState('');
   
   useEffect(() => {
-    // Simulate fetching user data from an API (you can replace this with actual API call)
-    // setUser({ username: 'JohnDoe', email: 'johndoe@example.com' });
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          username: user.displayName || '',
+          email: user.email || '',
+        });
+      }
+    });
   }, []);
 
-  const handleSaveChanges = (e) => {
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
 
     // Basic validation for password fields if user is changing password
@@ -27,7 +34,7 @@ export default function AccountPage() {
     }
 
     setError('');
-    // Make an API call to save changes (this is just a placeholder)
+    // Here you would make an API call to save changes (replace with your backend logic)
     console.log('User info saved', user);
     setEditMode(false);
   };

@@ -37,7 +37,7 @@ export default function LoginPage() {
       console.log('ID Token:', idToken);
 
       // Save the ID token and use it for API requests
-      localStorage.setItem('idToken', idToken);
+      localStorage.setItem('read-ease-token', idToken);
 
       // Redirect after login
       navigate('/');
