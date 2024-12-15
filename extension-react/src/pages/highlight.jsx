@@ -10,7 +10,9 @@ const Highlight = ({
   handleColorChange,
   handleOpacityChange,
   progressBarColor,
-  progressLoading
+  progressLoading,
+  statusText,
+  statusVisible
 }) => {
   
   //opacity slider
@@ -128,8 +130,8 @@ const Highlight = ({
           <div className="highlight-opacity-container">
             <svg
               ref={sliderRef}
-              width="120"
-              height="120"
+              width="100%"
+              height="100%"
               viewBox="0 0 100 100"
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
@@ -209,6 +211,7 @@ const Highlight = ({
               ></div>
             </div>
           )}
+          <div className={`status-text ${statusVisible ? '' : 'hidden'}`}>{statusText}</div>
         </div>
         </div>
       );

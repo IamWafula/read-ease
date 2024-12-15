@@ -15,6 +15,8 @@ function App() {
     ]);
   const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
   const [progressLoading, setProgressLoading] = useState(false);
+  const [statusText, setStatusText] = useState('');
+  const [statusVisible, setStatusVisible] = useState(true);
   const [clickTimeout, setClickTimeout] = useState(null);
   const [lastHighlightSettings, setLastHighlightSettings] = useState({
     color: null,
@@ -45,7 +47,9 @@ function App() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
         console.error('No active tab found.');
-        setProgressLoading(false); // Hide the progress bar on error
+        setStatusText('No active tab found.');
+        setStatusVisible(true);
+        setTimeout(() => setStatusVisible(false), 2000);
         return;
       }
 
@@ -93,7 +97,9 @@ function App() {
         }
       } else {
         // Proceed to highlight the text by processing it again
-          setProgressLoading(true);      
+          setProgressLoading(true); 
+          setStatusText('Fetching words...');  
+          setStatusVisible(true);   
   
           chrome.tabs.sendMessage(
             tabs[0].id,
@@ -102,6 +108,9 @@ function App() {
               if (chrome.runtime.lastError) {
                 console.error('Error sending message:', chrome.runtime.lastError.message);
                 setProgressLoading(false);
+                setStatusText('Error fetching words.');
+                setStatusVisible(true);
+                setTimeout(() => setStatusVisible(false), 1000);
                 return; // Hide the progress bar on error
               } 
 
@@ -109,6 +118,9 @@ function App() {
               if (response?.status === 'highlighted') {
                 console.log('Highlighting complete, hiding progress bar');
                 setProgressLoading(false);
+                setStatusText('Highlighting complete!');
+                setStatusVisible(true);
+                setTimeout(() => setStatusVisible(false), 1000);
                 setLastHighlightSettings({
                   color: currentColor,
                   opacity: currentOpacity,
@@ -187,6 +199,8 @@ function App() {
       handleOpacityChange={handleOpacityChange}
       progressBarColor={progressBarColor}
       progressLoading={progressLoading}
+      statusText={statusText}
+      statusVisible={statusVisible}
     />
   );
 }

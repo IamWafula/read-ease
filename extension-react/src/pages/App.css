@@ -1,6 +1,6 @@
 body {
-  width: 200px;
-  height: 200px; /* Adjusted to provide enough space for all elements */
+  width: 150px;
+  height: 150px; /* Adjusted to provide enough space for all elements */
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
@@ -26,18 +26,18 @@ body {
 /* Highlight and Opacity Bar Container */
 .highlight-opacity-container {
   position: relative;
-  width: 140px; /* Increased size for spacing */
-  height: 140px;
+  width: 60%; 
+  height: 60%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px; /* Add spacing below the circle+opacity combo */
+  margin-bottom: 5%;
 }
 
 /* Styling for the highlight circle */
 .highlight-circle {
-  width: 60px; /* Circle size */
-  height: 60px;
+  width: 50%; /* Circle size */
+  height: 50%;
   border-radius: 50%;
   border: 2px solid rgba(200, 200, 200, 0.4);
   background-color: #FFF8D4; /* Pastel yellow */
@@ -102,6 +102,7 @@ body {
   background-color: #e0e0e0;
   border-radius: 3px; /* Rounded edges */
   overflow: hidden;
+  margin-top: 5%;
 }
 
 .progress-bar-indeterminate {
@@ -123,6 +124,21 @@ body {
     left: 100%;
   }
 } 
+
+/* Status Text */
+.status-text {
+  font-size: 10px; /* Small font size */
+  color: #979292; /* Dark color for visibility */
+  margin-top: 5px; /* Space between progress bar and status text */
+  text-align: center; /* Center align the text */
+  font-family: 'Arial', sans-serif; /* Cute font style */
+  opacity: 1; /* Fully visible */
+  transition: opacity 1s ease-in-out; /* Smooth fade transition */
+}
+
+.status-text.hidden {
+  opacity: 0; /* Fully hidden */
+}
 
 /* Highlights */
 .read-ease-highlight {
