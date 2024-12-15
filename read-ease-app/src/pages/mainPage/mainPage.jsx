@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../authorization/firebase.js';
 import { Link, useNavigate } from 'react-router-dom';
 
+
 import Login from '../authorization/LoginPage.jsx';
 
 const DocumentCard = ({ title, preview, count }) => (
