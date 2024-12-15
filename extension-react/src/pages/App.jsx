@@ -75,18 +75,17 @@ function App() {
                   console.error('Error sending message:', chrome.runtime.lastError.message);
               } else if (response?.status === 'styles_updated') {
                   console.log('Highlight styles updated successfully.');
+                  // Update last highlight settings
+                  setLastHighlightSettings((prev) => ({
+                    ...prev,
+                    color: currentColor,
+                    opacity: currentOpacity,
+                }));
               } else {
                   console.warn('Unexpected response:', response);
               }
           }
       );
-
-      // Update last highlight settings
-      setLastHighlightSettings((prev) => ({
-          ...prev,
-          color: currentColor,
-          opacity: currentOpacity,
-      }));
 
         } else {
           // No changes, do nothing
@@ -110,6 +109,12 @@ function App() {
               if (response?.status === 'highlighted') {
                 console.log('Highlighting complete, hiding progress bar');
                 setProgressLoading(false);
+                setLastHighlightSettings({
+                  color: currentColor,
+                  opacity: currentOpacity,
+                  pageUrl: currentPageUrl,
+                  highlighted: true,
+                });
               } else {
                 console.warn('Unexpected response:', response);
                 setProgressLoading(false); // Ensure progress bar is hidden in all cases
@@ -117,12 +122,7 @@ function App() {
             }
           );
 
-          setLastHighlightSettings({
-            color: currentColor,
-            opacity: currentOpacity,
-            pageUrl: currentPageUrl,
-            highlighted: true,
-          });
+
         }
       });
     };
@@ -170,7 +170,8 @@ function App() {
   };
   
   const handleOpacityChange = (event) => {
-    setGlobalOpacity(event.target.value);
+    const newOpacity = parseFloat(event.target.value);
+    setGlobalOpacity(newOpacity);
   };
 
 

@@ -15,10 +15,11 @@ function getWikipediaText() {
 
 // function for highlights
 function updateHighlightStyle(color, opacity) {
+    const rgbaColor = hexToRgba(color, opacity);
     return `
         .read-ease-highlight {
-            background-color: ${color} !important;
-            opacity: ${opacity} !important;
+            background-color: ${rgbaColor} !important;
+            // opacity: ${opacity} !important;
             border-radius: 2px;
         }
     `;
@@ -26,17 +27,27 @@ function updateHighlightStyle(color, opacity) {
 
 function applyHighlightStyles(color, opacity) {
     console.log('Updating highlight styles...');
+    const rgbaColor = hexToRgba(color, opacity);
     const styleContent = `
         .read-ease-highlight {
-            background-color: ${color} !important;
-            opacity: ${opacity} !important;
+            background-color: ${rgbaColor} !important; /* Opacity only applies to the background */
+            // opacity: inherit !important; /* Preserve original text color */
         }
     `;
     styleSheet.textContent = styleContent;
     console.log(`Highlight styles updated to color: ${color}, opacity: ${opacity}`);
 }
 
-
+function hexToRgba(hex, opacity) {
+    // Remove '#' if present
+    hex = hex.replace('#', '');
+    // Handle shorthand hex codes (e.g., '#abc')
+    if (hex.length === 3) {
+        hex = hex.split('').map((char) => char + char).join('');
+    }
+    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
+}
 
 function highlightWords(phrases) {
     console.log('Starting highlightWords with phrases:', phrases);
@@ -174,7 +185,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // TODO: Implement this function
         const color = request.color || 'yellow';  // Default to yellow if no color provided
         const opacity = request.opacity || 1;
-        styleSheet.textContent = updateHighlightStyle(color);  // Update global style
+        styleSheet.textContent = updateHighlightStyle(color, opacity);  // Update global style
 
         const currentUrl = window.location.href;
         let mainText = null;
