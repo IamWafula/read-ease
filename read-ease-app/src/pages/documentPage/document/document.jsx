@@ -32,12 +32,13 @@ export default function Document() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:3000/process-text', {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URI+'/process-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
         },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ text: inputText, uid: localStorage.getItem('read-ease-uid') }),
       });
 
       if (!response.ok) {

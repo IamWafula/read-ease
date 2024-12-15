@@ -1,12 +1,12 @@
 {
     "flask": {
-        "image": "677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo:read-ease",
+        "image": "public.ecr.aws/y7l0x2i0/read-ease-repo:read-ease",
         "ports": {
             "3000": "HTTP"
         }
     },
     "redis": {
-        "image": "677276084427.dkr.ecr.us-east-1.amazonaws.com/redis:redis",
+        "image": "public.ecr.aws/y7l0x2i0/redis-repo:redis",
         "ports": {
             "6379": "TCP"
         }

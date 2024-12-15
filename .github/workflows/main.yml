@@ -80,10 +80,10 @@ jobs:
 
           # Set image tag and ECR repository name
           IMAGE_TAG=read-ease
-          REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
+          REPOSITORY_URI=public.ecr.aws/y7l0x2i0/read-ease-repo
 
           REDIS_IMAGE=redis
-          REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
+          REDIS_REPOSITORY=public.ecr.aws/y7l0x2i0/redis-repo
 
           # Build the Docker image          
           docker buildx build \
