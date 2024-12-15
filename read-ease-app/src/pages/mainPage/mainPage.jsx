@@ -1,3 +1,4 @@
+
 // mainPage.jsx
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -9,9 +10,9 @@ import Login from '../authorization/LoginPage.jsx';
 const DocumentCard = ({ title, preview, count }) => (
     <Link to={`/documents/${title}`} className="block">
       <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-        {title === "New" ? (
+        {title === "new" ? (
           <div className="flex flex-col items-center justify-center h-32">
-            <span className="text-gray-600">Upload</span>
+            <span className="text-gray-600">Create New Document</span>
           </div>
         ) : (
           <>
@@ -32,25 +33,9 @@ export default function MainPage() {
 
     const documents = [
         {
-          title: "New",
+          title: "new",
           preview: "",
         },
-        {
-          title: "Doc1",
-          preview: "past history...",
-        },
-        {
-          title: "Doc2",
-          preview: "past history...",
-        },
-        {
-          title: "Doc3",
-          preview: "past history...",
-        },
-        {
-          title: "Doc4",
-          preview: "past history...",
-        }
       ];
 
 
@@ -138,3 +123,11 @@ export default function MainPage() {
   );
 }
 
+
+   
+
+
+
+
+  
+ 

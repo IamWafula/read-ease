@@ -54,8 +54,6 @@ const DocumentComponent = (document) => {
 }
 
 
-
-
 export default function DocumentsPage() {
   const {id} = useParams();
   const [documents, setDocuments] = useState([]);

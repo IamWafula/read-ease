@@ -95,14 +95,14 @@ export default function Document() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-8 p-6 max-w-4xl mx-auto">
       {/* Document Title Input */}
       <div className="flex flex-col gap-2">
         <input
           type="text"
           value={docTitle}
           onChange={(e) => setDocTitle(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="p-3 border-2 border-gray-300 rounded-md text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Untitled Document"
         />
       </div>
@@ -113,7 +113,7 @@ export default function Document() {
         ref={editableBoxRef}
         contentEditable="true"
         suppressContentEditableWarning={true}
-        className="w-full p-2 border border-gray-300 rounded overflow-y-auto"
+        className="w-full p-4 border-2 border-gray-300 rounded-lg overflow-y-auto"
         style={{
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
@@ -124,17 +124,20 @@ export default function Document() {
       ></div>
 
       {/* Customization Controls */}
-      <div className="flex gap-4">
-        <div className="flex flex-col">
-          <label className="font-bold">Highlight Color</label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-3">
+          <label className="font-bold text-lg">Highlight Color</label>
           <input
             type="color"
             value={highlightColor}
             onChange={(e) => setHighlightColor(e.target.value)}
+            className="w-full p-2 border rounded-full cursor-pointer"
+            style={{ height: '40px' }}
           />
         </div>
-        <div className="flex flex-col">
-          <label className="font-bold">Highlight Opacity</label>
+
+        <div className="flex flex-col gap-3">
+          <label className="font-bold text-lg">Highlight Opacity</label>
           <input
             type="range"
             min="0.1"
@@ -142,14 +145,22 @@ export default function Document() {
             step="0.1"
             value={highlightOpacity}
             onChange={(e) => setHighlightOpacity(e.target.value)}
+            className="w-full"
           />
+          <div className="flex justify-between text-sm">
+            <span>0.1</span>
+            <span>1.0</span>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <label className="font-bold">Bold Color</label>
+
+        <div className="flex flex-col gap-3">
+          <label className="font-bold text-lg">Bold Color</label>
           <input
             type="color"
             value={boldColor}
             onChange={(e) => setBoldColor(e.target.value)}
+            className="w-full p-2 border rounded-full cursor-pointer"
+            style={{ height: '40px' }}
           />
         </div>
       </div>
@@ -157,7 +168,7 @@ export default function Document() {
       {/* Process Button */}
       <button
         onClick={handleProcessText}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all mt-6 self-center"
       >
         Process Text
       </button>
