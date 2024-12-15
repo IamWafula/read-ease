@@ -8,7 +8,6 @@ const Highlight = ({
   circles,
   handleClick,
   handleColorChange,
-  handleOpacityChange,
   progressBarColor,
   progressLoading,
   statusText,
@@ -49,7 +48,7 @@ const Highlight = ({
     setLastAngle(constrainedAngle);
     // Map the constrained angle to opacity (0–1)
     const normalizedAngle = constrainedAngle - 15; // Offset by start of arc
-    return (normalizedAngle / 330).toFixed(2); // Scale to [0, 1]
+    return parseFloat((normalizedAngle / 330).toFixed(2)); // Scale to [0, 1]
   };
   
   const describeArc = (x, y, radius, startAngle, endAngle) => {
@@ -129,6 +128,7 @@ const Highlight = ({
         <div className="parent-container">
           <div className="highlight-opacity-container">
             <svg
+              role="slider"
               ref={sliderRef}
               width="100%"
               height="100%"
@@ -177,7 +177,9 @@ const Highlight = ({
 
             {circles.map((circle, index) => (
               <div
+                key={`circle-${index}`}
                 className={`highlight-circle selected`}
+                aria-label={`highlight-circle-${index}`}
                 style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -188,7 +190,7 @@ const Highlight = ({
                 <div className="speech-bubble">
                   {colorOptions.map((color, i) => (
                     <div
-                      key={i}
+                      key={`color-option-${i}`}
                       className="color-option"
                       style={{ backgroundColor: color }}
                       onClick={(e) => {

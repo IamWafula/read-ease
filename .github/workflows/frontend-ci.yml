@@ -1,0 +1,105 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test-and-build:
+    name: Run Frontend Tests and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.20.4' # Match the Node.js version in your project
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          cd extension-react
+          npm install
+
+      # Step 4: Run tests
+      - name: Run Jest tests
+        run: |
+          cd extension-react
+          npm test
+
+      # Step 5: Build the frontend
+      - name: Build frontend
+        run: |
+          cd extension-react
+          npm run build
+
+  deploy:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: test-and-build # Ensure tests pass before deployment
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up AWS credentials (or any other deployment provider)
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 3: Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # emulate target arch
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+
+      # Build and push Docker image to Amazon ECR
+      - name: Build and push Docker image
+        run: |
+          # cd into the directory with the Dockerfile
+          cd backend 
+
+          # Set image tag and ECR repository name
+          IMAGE_TAG=read-ease
+          REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
+
+          # Build the Docker image          
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t $REPOSITORY_URI:$IMAGE_TAG \
+            --push . 
+
+      # Deploy to Lightsail
+      - name: Deploy to Lightsail
+        run: |
+          # cd into the directory with the Dockerfile
+          cd backend 
+
+          # Define deployment file and container name          
+          SERVICE_NAME=read-ease
+
+          # Create Lightsail container service deployment
+          aws lightsail create-container-service-deployment \
+            --service-name $SERVICE_NAME \
+            --containers file://containers.json \
+            --public-endpoint file://public-endpoint.json
+
+

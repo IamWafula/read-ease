@@ -237,3 +237,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return false;
     }
 });
+
+// Export for testing if the environment is Node.js (used for Jest)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { hexToRgba, updateHighlightStyle, highlightWords };
+}
