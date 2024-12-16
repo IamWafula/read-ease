@@ -10,5 +10,6 @@ export default {
     },
     cacheDirectory: '<rootDir>/.jest-cache',
     testMatch: ['**/testing/**/*.test.[jt]s?(x)'], // Match test files
+
   };
   
