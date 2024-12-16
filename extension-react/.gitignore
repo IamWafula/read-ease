@@ -82,3 +82,15 @@ public
 
 # TernJS port file
 .tern-port
+
+#virtual environment
+readease/
+
+# Jest cache files
+coverage/
+.jest-cache/
+.jest/
+
+# Avoid committing sensitive files
+src/jest/mocks/firebaseAuthMock.js
+src/jest/mocks/chromeApiMock.js
