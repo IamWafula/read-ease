@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import Document from '../documentPage/document/document.jsx';
 
 
-function DocumentCard({ title, preview, count, isNew, documentId }) {
+function DocumentCard({ title, preview, count, isNew, documentId, onDelete }) {
   const navigate = useNavigate();
 
   const handleClick = async () => {
@@ -37,6 +37,14 @@ function DocumentCard({ title, preview, count, isNew, documentId }) {
     }
   };
 
+  const handleDelete = async (event) => {
+    // Prevent click propagation to the parent div
+    event.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this document?')) {
+      await onDelete(documentId);
+    }
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -50,7 +58,15 @@ function DocumentCard({ title, preview, count, isNew, documentId }) {
         <>
           <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">{preview}</p>
-          <div className="text-red-500 font-medium">{count}</div>
+          <div className="flex justify-between items-center">
+            <div className="text-red-500 font-medium">{count}</div>
+            <button
+              onClick={handleDelete}
+              className="text-red-600 hover:text-red-800 transition"
+            >
+              Delete
+            </button>
+          </div>
         </>
       )}
     </div>
@@ -96,6 +112,24 @@ export default function MainPage() {
     fetchDocuments();
   }, []);
 
+  const deleteDocument = async (documentId) => {
+    const response = await fetch('http://127.0.0.1:3000/user/delete_document', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+      },
+      body: JSON.stringify({
+        uid: localStorage.getItem('read-ease-uid'),
+        document_id: documentId,
+      }),
+    });
+
+    if (response.status === 200) {
+      setDocuments((prevDocs) => prevDocs.filter((doc) => doc.documentId !== documentId));
+    }
+  };
+
 
     
     
@@ -121,6 +155,8 @@ export default function MainPage() {
         
         return () => unsubscribe();
     }, []);
+
+
 
     const handleSignOut = async () => {
         try {
@@ -172,18 +208,11 @@ export default function MainPage() {
                 count={doc.count}
                 isNew={doc.isNew}
                 documentId={doc.documentId}
+                onDelete={deleteDocument} // Pass the delete function as a prop
               />
             ))}
           </div>
         </div>
-      </div>
-    );
-  }
-
-   
-
-
-
-
-  
- 
+     </div>
+  );
+}
