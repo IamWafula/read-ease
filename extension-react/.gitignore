@@ -94,3 +94,28 @@ coverage/
 # Avoid committing sensitive files
 src/jest/mocks/firebaseAuthMock.js
 src/jest/mocks/chromeApiMock.js
+
+# Dependencies and build
+node_modules/
+dist/
+build/
+.hypothesis/
+.pytest_cache/
+.pyre/
+
+# Environment and config files
+.env
+.env.local
+**/config.js
+**/firebaseAccountKey.json
+
+# IDE and OS files
+.vscode/
+.idea/
+*.bak
+*~
+.DS_Store
+
+# Project specific
+readease/
+/site
