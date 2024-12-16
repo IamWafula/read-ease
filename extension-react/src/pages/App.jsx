@@ -204,6 +204,16 @@ function App() {
 
   return (
     <div>
+
+      <a
+        href="https://main.domwg75nq6jft.amplifyapp.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="redirect-text"
+      >
+        READEASE
+      </a>
+
       {user && (
       <img
         src={logoutIcon}

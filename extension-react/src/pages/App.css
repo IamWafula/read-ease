@@ -13,6 +13,27 @@ body {
   position: relative; /* Ensures elements can be positioned within the body */
 }
 
+.redirect-text {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  font-size: 11px; /* Larger font size for prominence */
+  font-weight: 700; /* Bold to make it stand out */
+  font-family: 'Roboto', sans-serif; /* Clean and modern font */
+  color: #959595; /* Professional blue color */
+  letter-spacing: 1px; /* Slight spacing between letters for elegance */
+  text-decoration: none; /* Remove default underline */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Add slight shadow for depth */
+  transition: color 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.redirect-text:hover {
+  color: #5f5e5e; /* Darker shade of blue on hover */
+  cursor: pointer; /* Pointer cursor to indicate clickability */
+}
+
+
+
 /* Styling for the logout icon */
 .logout-icon {
   position: absolute;
@@ -46,7 +67,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 5%;
+  top: 10px; 
 }
 
 /* Styling for the highlight circle */
@@ -117,7 +138,7 @@ body {
   background-color: #e0e0e0;
   border-radius: 3px; /* Rounded edges */
   overflow: hidden;
-  margin-top: 5%;
+  margin-top: 20px;
 }
 
 .progress-bar-indeterminate {
@@ -149,6 +170,7 @@ body {
   font-family: 'Arial', sans-serif; /* Cute font style */
   opacity: 1; /* Fully visible */
   transition: opacity 1s ease-in-out; /* Smooth fade transition */
+  margin-top: 10px;
 }
 
 .status-text.hidden {
