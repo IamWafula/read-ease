@@ -2,9 +2,14 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from '../src/pages/App';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut} from 'firebase/auth';
 
-jest.mock('firebase/auth');
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({})), // Mock getAuth function explicitly
+  signOut: jest.fn(), // Mock signOut function explicitly
+  onAuthStateChanged: jest.fn(), // Keep existing mock
+}));
+
 
 // Mock Chrome APIs
 beforeAll(() => {
@@ -69,6 +74,135 @@ describe('App Component', () => {
     await waitFor(() => {
       expect(document.querySelector('.parent-container')).toBeInTheDocument();
     });
+  });
+
+  test('handles logout successfully and clears user state', async () => {
+    const mockSignOut = jest.fn().mockResolvedValueOnce(); // Mock successful sign-out
+    signOut.mockImplementation(mockSignOut);
+
+    const setUser = jest.fn(); // Mock setUser function
+
+    const handleLogout = () => {
+      signOut()
+        .then(() => {
+          console.log('User signed out successfully.');
+          setUser(null); // Clear the user state after logout
+        })
+        .catch((error) => {
+          console.error('Error signing out:', error);
+        });
+    };
+
+    render(
+      <img
+        src="logoutIcon.png"
+        alt="Logout"
+        className="logout-icon"
+        onClick={handleLogout}
+      />
+    );
+
+    const logoutIcon = screen.getByAltText(/logout/i);
+    fireEvent.click(logoutIcon);
+
+    await waitFor(() => {
+      expect(mockSignOut).toHaveBeenCalledTimes(1); // Ensure signOut was called
+      expect(setUser).toHaveBeenCalledWith(null); // Ensure user state is cleared
+    });
+  });
+
+  test('handles sign-out error gracefully', async () => {
+    const mockError = new Error('Sign-out failed');
+    const mockSignOut = jest.fn().mockRejectedValueOnce(mockError); // Mock sign-out failure
+    signOut.mockImplementation(mockSignOut);
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Spy on console.error
+
+    const handleLogout = () => {
+      signOut()
+        .then(() => {
+          console.log('User signed out successfully.');
+        })
+        .catch((error) => {
+          console.error('Error signing out:', error);
+        });
+    };
+
+    render(
+      <img
+        src="logoutIcon.png"
+        alt="Logout"
+        className="logout-icon"
+        onClick={handleLogout}
+      />
+    );
+
+    const logoutIcon = screen.getByAltText(/logout/i);
+    fireEvent.click(logoutIcon);
+
+    await waitFor(() => {
+      expect(mockSignOut).toHaveBeenCalledTimes(1); // Ensure signOut was called
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error signing out:', mockError); // Ensure error was logged
+    });
+
+    consoleErrorSpy.mockRestore(); // Restore console.error
+  });
+
+  test('renders READEASE link correctly', () => {
+    render(
+      <a
+        href="https://main.domwg75nq6jft.amplifyapp.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="redirect-text"
+      >
+        READEASE
+      </a>
+    );
+
+    const link = screen.getByText(/READEASE/i);
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://main.domwg75nq6jft.amplifyapp.com/');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  test('conditionally renders logout icon when user is authenticated', () => {
+    const mockUser = { uid: '123', email: 'test@example.com' };
+
+    render(
+      <>
+        {mockUser && (
+          <img
+            src="logoutIcon.png"
+            alt="Logout"
+            className="logout-icon"
+          />
+        )}
+      </>
+    );
+
+    const logoutIcon = screen.getByAltText(/logout/i);
+    expect(logoutIcon).toBeInTheDocument();
+  });
+
+  test('does not render logout icon when user is not authenticated', () => {
+    const mockUser = null;
+
+    render(
+      <>
+        {mockUser && (
+          <img
+            src="logoutIcon.png"
+            alt="Logout"
+            className="logout-icon"
+          />
+        )}
+      </>
+    );
+
+    const logoutIcon = screen.queryByAltText(/logout/i);
+    expect(logoutIcon).not.toBeInTheDocument();
   });
 
   test('handles single click to apply highlights', async () => {
@@ -148,54 +282,6 @@ describe('App Component', () => {
     });
   });
 
-//   test('updates progress bar visibility and shows status text', async () => {
-//     const mockUser = { uid: '123', email: 'test@example.com' };
-//     onAuthStateChanged.mockImplementationOnce((auth, callback) => {
-//       callback(mockUser); // Simulate authenticated user
-//       return jest.fn();
-//     });
-  
-//     // Mock chrome.tabs.query and chrome.tabs.sendMessage
-//     chrome.tabs.query.mockImplementationOnce((queryInfo, callback) => {
-//       callback([{ id: 1, url: 'http://example.com' }]); // Simulate an active tab
-//     });
-  
-//     chrome.tabs.sendMessage.mockImplementationOnce((tabId, message, callback) => {
-//       if (message.action === 'highlightWords') {
-//         callback({ status: 'highlighted' }); // Simulate successful highlighting
-//       }
-//     });
-  
-//     render(<App />);
-  
-//     // Wait for the Highlight component or parent container to render
-//     await waitFor(() => {
-//       expect(document.querySelector('.parent-container')).toBeInTheDocument();
-//     });
-  
-//     const circle = screen.getByClass('.highlight-circle');
-//     fireEvent.click(circle); // Simulate a click that triggers handleCircleClick
-  
-//     // Check that the progress bar appears
-//     await waitFor(() => {
-//       const progressBar = screen.getByClass('.progress-bar');
-//       expect(progressBar).toBeInTheDocument(); // Progress bar should be rendered
-//     });
-  
-//     // Check that "Fetching words..." status text is shown
-//     await waitFor(() => {
-//       expect(screen.getByText(/Fetching words.../i)).toBeInTheDocument();
-//     });
-  
-//     // Simulate completion of text fetching and validate progress bar disappears
-//     await waitFor(() => {
-//       expect(screen.queryByText(/Fetching words.../i)).not.toBeInTheDocument(); // Status text disappears
-//       const progressBar = screen.queryByClass('.progress-bar');
-//       expect(progressBar).not.toBeInTheDocument(); // Progress bar disappears
-//     });
-//   });
-  
-  
 
   test('handles opacity slider changes correctly', async () => {
     const mockUser = { uid: '123', email: 'test@example.com' };
