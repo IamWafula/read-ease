@@ -118,8 +118,6 @@ const Highlight = ({
   }, []);
 
 
-
-
     return ( 
       <div id="body" onClick={(e) => e.stopPropagation()}>
         {console.log('Rendering Highlight.jsx')}

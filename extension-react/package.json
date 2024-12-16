@@ -40,7 +40,9 @@
     "vite": "^5.4.10"
   },
   "jest": {
-    "setupFilesAfterEnv": ["<rootDir>/jest/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest/jest.setup.js"
+    ],
     "testEnvironment": "jest-environment-jsdom",
     "transform": {
       "^.+\\.[tj]sx?$": "babel-jest"

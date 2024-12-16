@@ -18,3 +18,6 @@ describe('Content Script', () => {
     expect(highlighted.textContent).toBe('Hello');
   });
 });
+
+
+
