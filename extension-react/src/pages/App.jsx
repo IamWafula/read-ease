@@ -7,13 +7,12 @@ import Login from './login.jsx';
 import Highlight from './highlight.jsx';
 
 function App() {
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
-        { color: '#FFD700', isColorPickerOpen: false }
-    ]);
+    { color: '#FFD700', isColorPickerOpen: false }
+  ]);
   const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Default color
   const [progressLoading, setProgressLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
@@ -26,6 +25,9 @@ function App() {
     highlighted: false,
   });
 
+  // New state for storing keywords and sentences
+  const [keywords, setKeywords] = useState([]);
+  const [sentences, setSentences] = useState([]);
 
   // Authentication (State + Effect)
   useEffect(() => {
@@ -56,18 +58,15 @@ function App() {
 
       const currentPageUrl = tabs[0].url;
 
-      // Check if the text is already highlighted on the same page
       if (
         lastHighlightSettings.highlighted &&
         lastHighlightSettings.pageUrl === currentPageUrl
       ) {
-        // If only the color or opacity has changed, update the highlight styles
+        // Just update styles if needed
         if (
           lastHighlightSettings.color !== currentColor ||
           lastHighlightSettings.opacity !== currentOpacity
         ) {
-          // Update the highlight styles without re-processing the text
-          console.log('Updating highlight styles...');
           chrome.tabs.sendMessage(
             tabs[0].id,
             {
@@ -77,63 +76,64 @@ function App() {
             },
             (response) => {
               if (chrome.runtime.lastError) {
-                  console.error('Error sending message:', chrome.runtime.lastError.message);
+                console.error('Error sending message:', chrome.runtime.lastError.message);
               } else if (response?.status === 'styles_updated') {
-                  console.log('Highlight styles updated successfully.');
-                  // Update last highlight settings
-                  setLastHighlightSettings((prev) => ({
-                    ...prev,
-                    color: currentColor,
-                    opacity: currentOpacity,
-                  }));
+                console.log('Highlight styles updated successfully.');
+                setLastHighlightSettings((prev) => ({
+                  ...prev,
+                  color: currentColor,
+                  opacity: currentOpacity,
+                }));
               } else {
-                  console.warn('Unexpected response:', response);
+                console.warn('Unexpected response:', response);
               }
             }
           );
-
         } else {
-          // No changes, do nothing
           console.log('Highlight skipped: Settings unchanged.');
         }
       } else {
-        // Proceed to highlight the text by processing it again
-          setProgressLoading(true); 
-          setStatusText('Fetching words...');  
-          setStatusVisible(true);   
-  
-          chrome.tabs.sendMessage(
-            tabs[0].id,
-            { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.error('Error sending message:', chrome.runtime.lastError.message);
-                setProgressLoading(false);
-                setStatusText('Error fetching words.');
-                setStatusVisible(true);
-                setTimeout(() => setStatusVisible(false), 1000);
-                return; // Hide the progress bar on error
-              } 
+        // Highlight text again and fetch keywords/sentences
+        setProgressLoading(true); 
+        setStatusText('Fetching words...');  
+        setStatusVisible(true);   
 
-              // Hide the progress bar if the highlighting is complete
-              if (response?.status === 'highlighted') {
-                console.log('Highlighting complete, hiding progress bar');
-                setProgressLoading(false);
-                setStatusText('Highlighting complete!');
-                setStatusVisible(true);
-                setTimeout(() => setStatusVisible(false), 1000);
-                setLastHighlightSettings({
-                  color: currentColor,
-                  opacity: currentOpacity,
-                  pageUrl: currentPageUrl,
-                  highlighted: true,
-                });
-              } else {
-                console.warn('Unexpected response:', response);
-                setProgressLoading(false); // Ensure progress bar is hidden in all cases
-              }
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error('Error sending message:', chrome.runtime.lastError.message);
+              setProgressLoading(false);
+              setStatusText('Error fetching words.');
+              setStatusVisible(true);
+              setTimeout(() => setStatusVisible(false), 1000);
+              return;
             }
-          );
+
+            if (response?.status === 'highlighted') {
+              console.log('Highlighting complete, hiding progress bar');
+              setProgressLoading(false);
+              setStatusText('Highlighting complete!');
+              setStatusVisible(true);
+              setTimeout(() => setStatusVisible(false), 1000);
+
+              // Store the returned keywords and sentences
+              setKeywords(response.keywords || []);
+              setSentences(response.sentences || []);
+
+              setLastHighlightSettings({
+                color: currentColor,
+                opacity: currentOpacity,
+                pageUrl: currentPageUrl,
+                highlighted: true,
+              });
+            } else {
+              console.warn('Unexpected response:', response);
+              setProgressLoading(false);
+            }
+          }
+        );
       }
     });
   };
@@ -141,7 +141,6 @@ function App() {
   const handleDoubleClick = (index) => {
     console.log('Double click detected for toggling color picker:', index);
 
-    // Update the circles state to toggle the color picker for the double-clicked circle
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
@@ -173,7 +172,8 @@ function App() {
           return { ...circle, color, isSpeechBubbleOpen: false };
         }
         return circle;
-      }));
+      })
+    );
 
     setProgressBarColor(color);
   };
@@ -196,6 +196,8 @@ function App() {
       progressLoading={progressLoading}
       statusText={statusText}
       statusVisible={statusVisible}
+      keywords={keywords}
+      sentences={sentences}
     />
   );
 }

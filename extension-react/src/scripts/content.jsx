@@ -1,4 +1,4 @@
-
+// cs162-Read-Ease/extension-react/src/scripts/content.jsx
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
@@ -94,9 +94,6 @@ function highlightWords(phrases) {
         nodes.push(node);
     }
 
-    //console.log('Collected text content:', textContent.substring(0, 100) + '...');
-    //console.log('Number of text nodes found:', nodes.length);
-
     let match;
     let matches = [];
 
@@ -108,16 +105,12 @@ function highlightWords(phrases) {
         });
     }
 
-    //console.log('Found matches:', matches);
-
     // Handle overlapping matches
     matches = matches.filter((match, index) => {
         if (index === 0) return true;
         const prevMatch = matches[index - 1];
         return match.start >= prevMatch.end;
     });
-
-    //console.log('After filtering overlaps:', matches);
 
     // Apply highlights to matches
     for (let i = matches.length - 1; i >= 0; i--) {
@@ -209,13 +202,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
             const data = await response.json();
 
-            if (data.keywords.length > 0) {
+            if (data.keywords.length > 0 || data.sentences.length > 0) {
                 console.log('Starting highlighting process...');
                 const startTime = performance.now();
                 highlightWords(data.sentences);
                 const endTime = performance.now();
                 console.log(`Highlighting completed in ${(endTime - startTime).toFixed(2)}ms`);
-                sendResponse({ status: "highlighted" });
+                // Include keywords and sentences in the response
+                sendResponse({ 
+                  status: "highlighted",
+                  keywords: data.keywords,
+                  sentences: data.sentences
+                });
+            } else {
+                console.log('No keywords or sentences returned from the API.');
+                sendResponse({ status: "highlighted", keywords: [], sentences: [] });
             }
 
             console.log(data);            

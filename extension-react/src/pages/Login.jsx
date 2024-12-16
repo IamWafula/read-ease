@@ -1,3 +1,4 @@
+// cs162-Read-Ease/extension-react/src/pages/Login.jsx
 import React from 'react';
 import { auth } from '../firebase';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';

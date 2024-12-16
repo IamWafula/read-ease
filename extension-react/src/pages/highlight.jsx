@@ -11,8 +11,13 @@ const Highlight = ({
   progressBarColor,
   progressLoading,
   statusText,
-  statusVisible
+  statusVisible,
+  keywords,
+  sentences
 }) => {
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState('vocabulary');
 
   //opacity slider
   const sliderRef = useRef(null);
@@ -206,6 +211,40 @@ const Highlight = ({
           </div>
         )}
         <div className={`status-text ${statusVisible ? '' : 'hidden'}`}>{statusText}</div>
+      </div>
+
+      {/* Tabs for Vocabulary and Notes */}
+      <div className="tabs-container">
+        <div className="tabs">
+          <button 
+            className={activeTab === 'vocabulary' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('vocabulary')}
+          >
+            Vocabulary
+          </button>
+          <button 
+            className={activeTab === 'notes' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('notes')}
+          >
+            Notes
+          </button>
+        </div>
+        <div className="tab-content">
+          {activeTab === 'vocabulary' && (
+            <ul>
+              {keywords.length > 0 ? keywords.map((word, i) => (
+                <li key={`kw-${i}`}>{word}</li>
+              )) : <li>No keywords available.</li>}
+            </ul>
+          )}
+          {activeTab === 'notes' && (
+            <ul>
+              {sentences.length > 0 ? sentences.map((sentence, i) => (
+                <li key={`sen-${i}`}>{sentence}</li>
+              )) : <li>No sentences available.</li>}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

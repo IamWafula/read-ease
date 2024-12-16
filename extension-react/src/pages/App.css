@@ -1,16 +1,29 @@
 /* cs162-read-ease/extension-react/src/pages/App.css */
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  width: 180px;
-  height: 300px;
+  /* Start with a larger default size and allow resizing */
+  min-width: 300px;
+  min-height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Start from top to show header */
-  margin: 0;
-  padding: 20px;
+  justify-content: flex-start;
   position: relative;
+  padding: 20px;
+  margin: 0;
+
+  /* Allow the user to resize the popup window */
+  resize: both;
+  overflow: auto;
 
   /* More engaging background - subtle gradient */
   background: linear-gradient(135deg, #f9e9fa, #ffffff);
@@ -45,6 +58,7 @@ body {
   list-style-type: square;
   margin: 0;
   padding: 0;
+  color: #444; /* Ensure instruction text is readable */
 }
 
 .instructions li {
@@ -58,8 +72,8 @@ body {
   flex-direction: column; 
   align-items: center; 
   justify-content: center; 
-  height: 100%; 
   width: 100%; 
+  /* height: auto; Removed fixed height so content can grow */
 }
 
 /* Highlight and Opacity Bar Container */
@@ -179,4 +193,67 @@ body {
   color: inherit !important;
   background-color: rgba(255, 215, 0, 0.5);
   border-radius: 2px;
+}
+
+/* Tabs Container */
+.tabs-container {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
+  gap: 5px;
+}
+
+.tab {
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #555;
+  transition: background 0.2s;
+}
+
+.tab.active {
+  background: #ddd;
+  color: #333;
+}
+
+.tab:hover {
+  background: #eee;
+}
+
+/* Tab content: remove fixed max-height so it can grow, 
+   but user can resize the popup as needed. */
+.tab-content {
+  width: 100%;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  background: #fff;
+  color: #000; /* Black text for visibility */
+}
+
+.tab-content ul {
+  list-style-type: disc;
+  margin: 0;
+  padding-left: 15px;
+  color: #000; /* Black bullets and text */
+}
+
+.tab-content li {
+  font-size: 10px;
+  margin-bottom: 4px;
+  color: #000; /* Black text */
 }
