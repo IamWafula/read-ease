@@ -53,6 +53,9 @@ htmlcov/
 # Ignore any temporary or backup files
 *.bak
 *~
+# Ignore Firebase service account keys
+backend/utils/firebaseAccountKey.json
 
-*/node_modules/
-commands.md
+# Ignore any other sensitive keys
+*.key
+*.json
