@@ -1,4 +1,4 @@
-// highlight.jsx
+// cs162-read-ease/extension-react/src/pages/highlight.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 const Highlight = ({

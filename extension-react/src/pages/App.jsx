@@ -1,3 +1,4 @@
+// cs162-read-ease/extension-react/src/pages/App.jsx
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
