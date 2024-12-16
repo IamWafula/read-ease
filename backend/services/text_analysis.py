@@ -1,19 +1,22 @@
-#text_analysis.py
+# text_analysis.py
 
 import unittest
 import os
 import ast
-import dotenv
 
+from dotenv import load_dotenv
 import google.generativeai as genai
 
-# Configure the API with the key
-dotenv.load_dotenv()
-genai.configure(api_key=os.getenv("API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+# jwt imports
 
 
-def generate_analysis(text):
+async def generate_analysis(text):
+
+    # Configure the API with the key
+    load_dotenv()
+    genai.configure(api_key=os.getenv("API_KEY"))
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
     """Helper method to generate analysis using the Gemini model"""
     prompt = f""" 
         Extract key information from the text below following these specific requirements:

@@ -70,7 +70,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: all
-
+    
 
       # Build and push Docker image to Amazon ECR
       - name: Build and push Docker image
@@ -82,11 +82,17 @@ jobs:
           IMAGE_TAG=read-ease
           REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
 
+          REDIS_IMAGE=redis
+          REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
+
           # Build the Docker image          
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t $REPOSITORY_URI:$IMAGE_TAG \
             --push . 
+
+          # Build the Redis image
+          docker buildx build --platform linux/amd64,linux/arm64 -t $REDIS_REPOSITORY:$REDIS_IMAGE -f "Dockerfile redis" --push .      
 
       # Deploy to Lightsail
       - name: Deploy to Lightsail
@@ -102,4 +108,3 @@ jobs:
             --service-name $SERVICE_NAME \
             --containers file://containers.json \
             --public-endpoint file://public-endpoint.json
-

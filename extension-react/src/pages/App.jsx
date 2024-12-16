@@ -8,6 +8,10 @@ import Highlight from './highlight.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [uid, setUid] = useState(null)
+
+
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
@@ -32,10 +36,24 @@ function App() {
   // Authentication (State + Effect)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Auth state changed, currentUser:', currentUser);
+
+      const uid = currentUser ? currentUser.uid : null;
+
+      if (uid) {
+        auth.currentUser.getIdToken().then((token) => {
+          setToken(token);
+          setUid(uid)
+        });
+      }
+
       setUser(currentUser);
+
+
       setLoading(false);
     });
+    
+    console.log(user)
+
     return () => unsubscribe();
   }, []);
 
@@ -93,23 +111,28 @@ function App() {
           console.log('Highlight skipped: Settings unchanged.');
         }
       } else {
-        // Highlight text again and fetch keywords/sentences
-        setProgressLoading(true); 
-        setStatusText('Fetching words...');  
-        setStatusVisible(true);   
-
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error('Error sending message:', chrome.runtime.lastError.message);
-              setProgressLoading(false);
-              setStatusText('Error fetching words.');
-              setStatusVisible(true);
-              setTimeout(() => setStatusVisible(false), 1000);
-              return;
-            }
+        // Proceed to highlight the text by processing it again
+          setProgressLoading(true); 
+          setStatusText('Fetching words...');  
+          setStatusVisible(true);   
+  
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            { action: 'highlightWords', 
+              color: currentColor, 
+              opacity: currentOpacity, 
+              uid: uid,
+              auth_token : token
+            },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error('Error sending message:', chrome.runtime.lastError.message);
+                setProgressLoading(false);
+                setStatusText('Error fetching words.');
+                setStatusVisible(true);
+                setTimeout(() => setStatusVisible(false), 1000);
+                return; // Hide the progress bar on error
+              } 
 
             if (response?.status === 'highlighted') {
               console.log('Highlighting complete, hiding progress bar');
