@@ -53,23 +53,22 @@ function retrieveText() {
 }
 
 function highlightInPlace(phrases, nodes, offsets, textContent) {
-    console.log('Starting highlightInPlace with phrases:', phrases);
-    const skipTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'EMBED'];
+    //console.log('Starting highlightInPlace with phrases:', phrases);
 
     // Sort phrases by length to avoid overlapping matches
     phrases.sort((a, b) => b.length - a.length);
-    console.log('Sorted phrases:', phrases);
+    //console.log('Sorted phrases:', phrases);
 
     // Escape special characters in phrases
     phrases = phrases.map(phrase => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     
     // Add negative lookbehind and negative lookahead to each phrase
     phrases = phrases.map(phrase => `(?<!\\w)${phrase}(?!\\w)`);
-    console.log('Processed phrases:', phrases);
+    //console.log('Processed phrases:', phrases);
 
     // Combine phrases into a single regex pattern
     const regex = new RegExp(phrases.join('|'), 'gi');
-    console.log('Created regex:', regex);
+    //console.log('Created regex:', regex);
 
     let match;
     let matches = [];
@@ -144,7 +143,7 @@ function boldKeywords(keywords, nodes, offsets, textContent) {
 
     // Combine keywords into a single regex pattern
     const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
-    console.log('Created regex for keywords:', regex);
+    //console.log('Created regex for keywords:', regex);
 
     let match;
     let matches = [];
@@ -208,33 +207,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         async function getKeywords() {
             const { textContent, nodes, offsets } = retrieveText();
-
-            const response = await fetch('http://127.0.0.1:5000/process-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ "text": textContent })
-            });
-
-            const data = await response.json();
-
-            if (data.sentences.length > 0 || data.keywords.length > 0) {
-                console.log('Starting highlighting and bolding process...');
-                const startTime = performance.now();
-                if (data.sentences.length > 0) {
-                    highlightInPlace(data.sentences, nodes, offsets, textContent);
+            try {
+                const response = await fetch('http://127.0.0.1:5000/process-text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "text": textContent })
+                });
+                // Check if response is not OK
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                if (data.keywords.length > 0) {
-                    boldKeywords(data.keywords, nodes, offsets, textContent);
+                const data = await response.json();
+                // Validate data structure
+                if (!data || !data.keywords || !data.sentences) {
+                    console.error('Invalid response format:', data);
+                    alert('Received invalid data. Please try again.');
+                    return;
                 }
-                const endTime = performance.now();
-                console.log(`Highlighting and bolding completed in ${(endTime - startTime).toFixed(2)}ms`);
+                if (data.sentences.length > 0 || data.keywords.length > 0) {
+                    console.log('Starting highlighting and bolding process...');
+                    const startTime = performance.now();
+                    if (data.sentences.length > 0) {
+                        highlightInPlace(data.sentences, nodes, offsets, textContent);
+                    }
+                    if (data.keywords.length > 0) {
+                        boldKeywords(data.keywords, nodes, offsets, textContent);
+                    }
+                    const endTime = performance.now();
+                    console.log(`Highlighting and bolding completed in ${(endTime - startTime).toFixed(2)}ms`);
+                }
+            } catch (error) {
+                console.error('Error fetching or processing data:', error);
+                alert('Failed to fetch data. Please check your connection or try again later.');
             }
-
-            console.log(data);
         }
-
+        
         getKeywords();
         sendResponse({ status: "highlighted" });
     }
