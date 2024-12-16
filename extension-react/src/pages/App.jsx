@@ -1,9 +1,11 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase.js';
 import Login from './login.jsx';
 import Highlight from './highlight.jsx';
+import logoutIcon from '../assets/logout.png';
+
 
 function App() {
 
@@ -38,6 +40,18 @@ function App() {
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Login />;
+
+  const handleLogout = () => {
+    signOut(auth)
+        .then(() => {
+            console.log('User signed out successfully.');
+            setUser(null); // Clear the user state after logout
+        })
+        .catch((error) => {
+            console.error('Error signing out:', error);
+        });
+};
+
 
   // Event handlers
   const handleCircleClick = (index) => {
@@ -189,20 +203,34 @@ function App() {
 
 
   return (
-    <Highlight
-      globalOpacity={globalOpacity}
-      setGlobalOpacity={setGlobalOpacity}
-      setCircles={setCircles}
-      circles={circles}
-      handleClick={handleClick}
-      handleColorChange={handleColorChange}
-      handleOpacityChange={handleOpacityChange}
-      progressBarColor={progressBarColor}
-      progressLoading={progressLoading}
-      statusText={statusText}
-      statusVisible={statusVisible}
-    />
-  );
+    <div>
+      {user && (
+      <img
+        src={logoutIcon}
+        alt="Logout"
+        className="logout-icon"
+        onClick={handleLogout}
+      />
+    )}
+      {user ? (
+      <Highlight
+        globalOpacity={globalOpacity}
+        setGlobalOpacity={setGlobalOpacity}
+        setCircles={setCircles}
+        circles={circles}
+        handleClick={handleClick}
+        handleColorChange={handleColorChange}
+        handleOpacityChange={handleOpacityChange}
+        progressBarColor={progressBarColor}
+        progressLoading={progressLoading}
+        statusText={statusText}
+        statusVisible={statusVisible}
+      />
+    ) : (
+      <Login />
+    )}
+  </div>
+);
 }
 
 export default App;

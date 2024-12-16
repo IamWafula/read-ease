@@ -13,6 +13,21 @@ body {
   position: relative; /* Ensures elements can be positioned within the body */
 }
 
+/* Styling for the logout icon */
+.logout-icon {
+  position: absolute;
+  top: 10px; /* Distance from the top */
+  right: 10px; /* Distance from the right */
+  width: 24px; /* Smaller size */
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.logout-icon:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+}
+
 /* Parent container for alignment */
 .parent-container {
   display: flex;
