@@ -93,8 +93,6 @@ async def get_documents():
         data = request.get_json()
         user_id = data["uid"]
 
-        print(os.getenv("MONGO_URI"))
-
         mong_client = get_mongo_client()
 
         db = mong_client.get_database("readEase")
