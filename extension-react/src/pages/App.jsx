@@ -37,7 +37,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="loading-screen">Loading...</div>;
   if (!user) return <Login />;
 
   // Event handlers
@@ -54,7 +54,7 @@ function App() {
         return;
       }
 
-    const currentPageUrl = tabs[0].url;
+      const currentPageUrl = tabs[0].url;
 
       // Check if the text is already highlighted on the same page
       if (
@@ -85,12 +85,12 @@ function App() {
                     ...prev,
                     color: currentColor,
                     opacity: currentOpacity,
-                }));
+                  }));
               } else {
                   console.warn('Unexpected response:', response);
               }
-          }
-      );
+            }
+          );
 
         } else {
           // No changes, do nothing
@@ -134,11 +134,9 @@ function App() {
               }
             }
           );
-
-
-        }
-      });
-    };
+      }
+    });
+  };
 
   const handleDoubleClick = (index) => {
     console.log('Double click detected for toggling color picker:', index);
@@ -155,7 +153,6 @@ function App() {
   };
 
   const handleClick = (index) => {
-
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       setClickTimeout(null);
@@ -170,7 +167,6 @@ function App() {
   };
 
   const handleColorChange = (index, color) => {
-
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
@@ -179,15 +175,13 @@ function App() {
         return circle;
       }));
 
-      setProgressBarColor(color);
+    setProgressBarColor(color);
   };
   
   const handleOpacityChange = (event) => {
     const newOpacity = parseFloat(event.target.value);
     setGlobalOpacity(newOpacity);
   };
-
-
 
   return (
     <Highlight

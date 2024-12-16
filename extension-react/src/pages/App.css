@@ -1,33 +1,71 @@
 /* cs162-read-ease/extension-react/src/pages/App.css */
+
 body {
-  width: 150px;
-  height: 150px; /* Adjusted to provide enough space for all elements */
+  width: 180px;
+  height: 300px;
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Start from top to show header */
   margin: 0;
-  background-color: #ffffff;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  position: relative; /* Ensures elements can be positioned within the body */
+  position: relative;
+
+  /* More engaging background - subtle gradient */
+  background: linear-gradient(135deg, #f9e9fa, #ffffff);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Parent container for alignment */
+/* Header Section */
+.header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  font-size: 16px;
+  margin: 0 0 5px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.instructions {
+  font-size: 10px;
+  color: #444;
+  text-align: left;
+  margin: 0 auto;
+  width: 90%;
+  line-height: 1.2em;
+}
+
+.instructions ul {
+  list-style-type: square;
+  margin: 0;
+  padding: 0;
+}
+
+.instructions li {
+  margin-bottom: 3px;
+}
+
+
+/* Parent container */
 .parent-container {
   display: flex;
-  flex-direction: column; /* Align items vertically */
-  align-items: center; /* Center items horizontally */
-  justify-content: center; /* Center items vertically */
-  height: 100%; /* Fill the available height */
-  width: 100%; /* Fill the available width */
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+  width: 100%; 
 }
 
 /* Highlight and Opacity Bar Container */
 .highlight-opacity-container {
   position: relative;
-  width: 60%; 
+  width: 60%;
   height: 60%;
   display: flex;
   align-items: center;
@@ -35,38 +73,23 @@ body {
   margin-bottom: 5%;
 }
 
-/* Styling for the highlight circle */
+/* Highlight Circle */
 .highlight-circle {
-  width: 50%; /* Circle size */
+  width: 50%;
   height: 50%;
   border-radius: 50%;
   border: 2px solid rgba(200, 200, 200, 0.4);
-  background-color: #FFF8D4; /* Pastel yellow */
+  background-color: #FFF8D4; 
   box-shadow: 0 0 8px rgba(255, 223, 186, 0.6);
   cursor: pointer;
   position: absolute;
   z-index: 2;
 }
 
-/* Circular opacity slider */
-.custom-opacity-slider {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%; /* Full container width */
-  height: 100%; /* Full container height */
-  pointer-events: none; /* Prevent interaction */
-  border-radius: 50%;
-  border: 3px solid #d3d3d3; /* Thin ring */
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
-}
-
-/* Color Palette Styles */
+/* Color Palette (Speech Bubble) */
 .speech-bubble {
   position: absolute;
-  bottom: -80px; /* Adjust to ensure it's below the circle */
+  bottom: -80px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #fff;
@@ -74,10 +97,10 @@ body {
   border-radius: 8px;
   padding: 10px;
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping to create rows */
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 10px; /* Space between the color circles */
-  width: 120px; /* Fixed width to fit two rows of 4 circles */
+  gap: 10px;
+  width: 120px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -93,15 +116,13 @@ body {
   transform: scale(1.2);
 }
 
-
-
 /* Progress Bar Styles */
 .progress-bar {
   position: relative;
-  width: 80%; /* Adjust width as needed */
+  width: 80%;
   height: 6px;
   background-color: #e0e0e0;
-  border-radius: 3px; /* Rounded edges */
+  border-radius: 3px;
   overflow: hidden;
   margin-top: 5%;
 }
@@ -110,7 +131,7 @@ body {
   position: absolute;
   width: 20%;
   height: 100%;
-  background-color: #FFD700; /* Same as your highlight color */
+  background-color: #FFD700; 
   animation: indeterminate 1.5s infinite;
 }
 
@@ -124,26 +145,38 @@ body {
   100% {
     left: 100%;
   }
-} 
+}
 
 /* Status Text */
 .status-text {
-  font-size: 10px; /* Small font size */
-  color: #979292; /* Dark color for visibility */
-  margin-top: 5px; /* Space between progress bar and status text */
-  text-align: center; /* Center align the text */
-  font-family: 'Arial', sans-serif; /* Cute font style */
-  opacity: 1; /* Fully visible */
-  transition: opacity 1s ease-in-out; /* Smooth fade transition */
+  font-size: 10px;
+  color: #979292;
+  margin-top: 5px;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
 }
 
 .status-text.hidden {
-  opacity: 0; /* Fully hidden */
+  opacity: 0;
 }
 
-/* Highlights */
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  width: 100%;
+  height: 100%;
+}
+
+/* Highlighted text style (if needed) */
 .read-ease-highlight {
-  color: inherit !important; /* Ensure text color remains visible */
-  background-color: rgba(255, 215, 0, 0.5); /* Example background with opacity */
+  color: inherit !important;
+  background-color: rgba(255, 215, 0, 0.5);
   border-radius: 2px;
 }
