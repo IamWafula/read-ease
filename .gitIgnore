@@ -1,44 +1,50 @@
-# Ignore the virtual environment folder
+# =======================
+# General Ignored Files
+# =======================
+
+# Virtual Environment
 venv/
 
-# Ignore Python cache and compiled files
+# Python cache and compiled files
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 
-# Ignore Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# Ignore local environment files
+# Local environment files
 .env
 .env.*
+*.local
 
-# Ignore any temporary files
+# Temporary files
 *.log
 *.tmp
 *.temp
+*.bak
+*~
 
-# Ignore IDE-specific files
+# macOS-specific files
+.DS_Store
+
+# IDE and Editor files
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Ignore macOS-specific files
-.DS_Store
-
-# Ignore package management files
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Ignore coverage reports
+# Coverage and debugging files
 htmlcov/
 .coverage
 .coverage.*
 .cache
-
-# Ignore testing and debugging files
 .tox/
 .nox/
 *.cover
@@ -46,17 +52,59 @@ htmlcov/
 .hypothesis/
 .pytest_cache/
 .pyre/
+.jest-cache/
+.jest/
+coverage/
 
-# Ignore documentation builds
+# Documentation builds
 /site
 
-# Ignore any temporary or backup files
-*.bak
-*~
-# Ignore Firebase service account keys
-backend/utils/firebaseAccountKey.json
+# Package management files
+node_modules/
+dist/
+dist-ssr/
+.pnp/
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
+# Production builds
+/build
+
+# Jest mock and cache files
+.jest/
+.jest-cache/
+coverage/
+src/jest/mocks/firebaseAuthMock.js
+src/jest/mocks/chromeApiMock.js
+
+# ===========================
+# Sensitive and Key Files
+# ===========================
 firebaseAccountKey.json
-# Ignore any other sensitive keys
+backend/utils/firebaseAccountKey.json
+manifest.json
+config.js
+
+# Other sensitive keys
 *.key
 *.json
+
+# ======================
+# Project Specific Files
+# ======================
+readease/
+
+# Logs
+logs/
+*.log
+
+# Exclude React-specific files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
