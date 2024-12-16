@@ -1,4 +1,3 @@
-// documentsPage.jsx
 import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
@@ -54,10 +53,7 @@ const DocumentComponent = (document) => {
 }
 
 
-
-
 export default function DocumentsPage() {
-  const {id} = useParams();
   const [documents, setDocuments] = useState([]);
 
   useEffect(() => {
@@ -75,7 +71,6 @@ export default function DocumentsPage() {
 
       if (response.status == 200){
         const data = await response.json();
-        console.log(data);
         setDocuments(data);
       }
       

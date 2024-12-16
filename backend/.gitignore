@@ -1,0 +1,57 @@
+# Ignore the virtual environment folder
+venv/
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore local environment files
+.env
+.env.*
+
+# Ignore any temporary files
+*.log
+*.tmp
+*.temp
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore macOS-specific files
+.DS_Store
+
+# Ignore package management files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+
+# Ignore testing and debugging files
+.tox/
+.nox/
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.pyre/
+
+# Ignore documentation builds
+/site
+
+# Ignore any temporary or backup files
+*.bak
+*~
+
+readease/
