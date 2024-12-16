@@ -19,7 +19,7 @@ def cache_url(url, summarized_data):
 
     if redis_client:
         redis_client.hset(
-            url,
+            repr(url),
             mapping={
                 "keywords": json.dumps(summarized_data["keywords"]),
                 "sentences": json.dumps(summarized_data["sentences"]),

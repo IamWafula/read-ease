@@ -8,20 +8,16 @@ services:
     ports:
       - "3000:3000"    
     depends_on:
-      - db
+      - redis
     networks:
       - backend
 
-  db:
+  redis:
     build: 
       context: .
-    image: postgres:12
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: readEase
+      dockerfile: "Dockerfile redis"    
     ports:
-      - "5432:5432"
+      - "6379:6379"
     networks:
       - backend
     
