@@ -6,3 +6,8 @@ export const onAuthStateChanged = jest.fn((auth, callback) => {
 
 export const getAuth = jest.fn(() => ({}));
 
+export const auth = {
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+};
