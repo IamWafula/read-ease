@@ -82,8 +82,12 @@ jobs:
           IMAGE_TAG=read-ease
           REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
 
+          # export IMAGE_TAG=read-ease && export REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
+
           REDIS_IMAGE=redis
           REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
+
+          # export REDIS_IMAGE=redis && export REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
 
           # Build the Docker image          
           docker buildx build \

@@ -1,9 +1,3 @@
-FROM redis:7-alpine
-
-# Copy custom redis configuration if needed
-# COPY redis.conf /usr/local/etc/redis/redis.conf
+FROM redis:7.4
 
 EXPOSE 6379
-
-# Use redis-server to start Redis
-CMD ["redis-server"]
