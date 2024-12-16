@@ -91,7 +91,7 @@ config.js
 
 # Other sensitive keys
 *.key
-*.json
+
 
 # ======================
 # Project Specific Files
