@@ -14,6 +14,7 @@ import Document from '../documentPage/document/document.jsx';
 function DocumentCard({ title, preview, count, isNew, documentId, onDelete }) {
   const navigate = useNavigate();
 
+
   const handleClick = async () => {
     if (isNew) {
       const response = await fetch('http://127.0.0.1:3000/user/add_document', {
@@ -100,6 +101,7 @@ export default function MainPage() {
         setDocuments([
           { title: 'new', isNew: true },
           ...data.map(doc => ({
+            id: doc._id,
             title: doc.title,
             preview: doc.preview,
             count: doc.count,
@@ -200,17 +202,19 @@ export default function MainPage() {
   
           {/* Document Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {documents.map((doc, index) => (
-              <DocumentCard
+            {documents.map((doc, index) => {
+              return (
+                <DocumentCard                
                 key={index}
                 title={doc.title}
                 preview={doc.preview}
                 count={doc.count}
                 isNew={doc.isNew}
-                documentId={doc.documentId}
+                documentId={doc.id}
                 onDelete={deleteDocument} // Pass the delete function as a prop
               />
-            ))}
+              )
+            } )}
           </div>
         </div>
      </div>
