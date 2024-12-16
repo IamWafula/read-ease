@@ -3,17 +3,17 @@ from flask import Blueprint, request, jsonify
 
 from services.text_analysis import generate_analysis
 
-from utils.decorators import authorization_required
+from utils.decorators import authorization_required, async_authorization_required
 from services.caching import cache_url, retrieve_cache_url
 
 import json
 
-text_processing_bp = Blueprint("text_processing", __name__)
+text_processing_bp = Blueprint("process-text", __name__)
 
 
 @text_processing_bp.route("/process-text", methods=["POST"])
-@authorization_required()
-def process_text():
+@async_authorization_required()
+async def process_text():
     data = request.get_json()
     text = data["text"]
     url = data.get("url")
@@ -29,7 +29,7 @@ def process_text():
         return jsonify({"error": "No text provided"}), 400
 
     # Use the service to extract keywords
-    result = generate_analysis(text)
+    result = await generate_analysis(text)
 
     if url:
         cache_url(repr(url), result)

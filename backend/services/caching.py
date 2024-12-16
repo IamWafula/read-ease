@@ -9,7 +9,7 @@ def get_redis_client():
     load_dotenv()
 
     if os.getenv("ENV") == "production":
-        pass
+        return redis.Redis(host="redis", port="6379")
     else:
         return redis.Redis(host="localhost", port="6379")
 

@@ -26,7 +26,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, allow_headers="*")
 
     limiter = Limiter(
         app,
@@ -36,7 +36,7 @@ def create_app():
     # Register the blueprint for text processing
     app.register_blueprint(user_bp, url_prefix="/user")
 
-    app.register_blueprint(text_processing_bp, url_prefix="/text-processing")
+    app.register_blueprint(text_processing_bp)
 
     return app
 

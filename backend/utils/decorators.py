@@ -78,7 +78,8 @@ def async_authorization_required():
                 uid = decoded_token["uid"]
                 if uid != request_body["uid"]:
                     return jsonify({"error": "Unauthorized"}), 401
-            except:
+            except Exception as e:
+                print(e)
                 return jsonify({"error": "Unauthorized"}), 401
 
             return await func(*args, **kwargs)

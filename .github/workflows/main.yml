@@ -80,10 +80,10 @@ jobs:
 
           # Set image tag and ECR repository name
           IMAGE_TAG=read-ease
-          REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
+          REPOSITORY_URI=public.ecr.aws/y7l0x2i0/read-ease-repo
 
-          SQLIMAGE=mysql
-          SQLREPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/mysql
+          REDIS_IMAGE=redis
+          REDIS_REPOSITORY=public.ecr.aws/y7l0x2i0/redis-repo
 
           # Build the Docker image          
           docker buildx build \
@@ -91,8 +91,8 @@ jobs:
             -t $REPOSITORY_URI:$IMAGE_TAG \
             --push . 
 
-
-          # docker buildx build --platform linux/amd64,linux/arm64 -t $SQLREPOSITORY_URI:$SQLIMAGE -f "Dockerfile sql" --push .      
+          # Build the Redis image
+          docker buildx build --platform linux/amd64,linux/arm64 -t $REDIS_REPOSITORY:$REDIS_IMAGE -f "Dockerfile redis" --push .      
 
       # Deploy to Lightsail
       - name: Deploy to Lightsail
@@ -108,4 +108,3 @@ jobs:
             --service-name $SERVICE_NAME \
             --containers file://containers.json \
             --public-endpoint file://public-endpoint.json
-
