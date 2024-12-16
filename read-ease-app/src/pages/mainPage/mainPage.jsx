@@ -3,28 +3,85 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../authorization/firebase.js';
-import { Link, useNavigate } from 'react-router-dom';
-
-
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Login from '../authorization/LoginPage.jsx';
 
-const DocumentCard = ({ title, preview, count }) => (
-    <Link to={`/documents/${title}`} className="block">
-      <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-        {title === "new" ? (
-          <div className="flex flex-col items-center justify-center h-32">
-            <span className="text-gray-600">Create New Document</span>
+import { useParams } from 'react-router-dom';
+
+import Document from '../documentPage/document/document.jsx';
+
+
+
+
+function DocumentCard ({ title, preview, count }) {
+
+      const [navigateToDocument, setNavigateToDocument] = useState(false);
+      const [documentId, setDocumentId] = useState(null);
+
+      async function addDocument() {
+        const response = await fetch('http://127.0.0.1:3000/user/add_document', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+          },
+          body: JSON.stringify({
+            uid: localStorage.getItem('read-ease-uid'),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.document_id){
+
+          return data.document_id;
+
+        }
+
+        return null;
+      }
+
+
+      return (
+        <div
+          onClick={ async () => {
+            
+            const documentId = await addDocument();
+            // const documentId = '675f837c84d3c59b5cf6071e'
+
+            if (documentId){
+              setDocumentId(documentId);
+              setNavigateToDocument(true);
+            }
+
+          
+          }}
+        >
+
+          {
+            navigateToDocument && 
+            <Navigate to={`/documents/${documentId}`} />
+          }
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            {title === "new" ? (
+              <div className="flex flex-col items-center justify-center h-32">
+                <span className="text-gray-600">Create New Document</span>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{preview}</p>
+                <div className="text-red-500 font-medium">{count}</div>
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{preview}</p>
-            <div className="text-red-500 font-medium">{count}</div>
-          </>
-        )}
-      </div>
-    </Link>
-  );
+        </div>
+      );
+      
+      
+
+    
+}
 
 export default function MainPage() {
 
@@ -32,13 +89,44 @@ export default function MainPage() {
     const [token, setToken] = useState(null);
     const navigate = useNavigate(); // Hook for navigation
 
+    // const [documents, setDocuments] = useState([]);
+
     const documents = [
         {
           title: "new",
           preview: "",
         },
-      ];
+    ];
 
+
+    useEffect(() => {
+      async function fetchDocuments(user) {
+        const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+          },
+          body: JSON.stringify({
+            uid: localStorage.getItem('read-ease-uid'),
+          }),
+        });
+
+        if (response.status == 200){
+          const data = await response.json();
+          // setDocuments(data);
+          console.log(data)
+        }
+        
+        
+      }
+
+      fetchDocuments();
+    }, []);
+
+
+    
+    
 
     // Auth effect
     useEffect(() => {
@@ -59,8 +147,6 @@ export default function MainPage() {
 
         });
         
-        console.log(user)
-
         return () => unsubscribe();
     }, []);
 

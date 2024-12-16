@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useEffect } from 'react';
 
 export default function Document() {
   const [inputText, setInputText] = useState('');
@@ -10,6 +11,12 @@ export default function Document() {
   const [docTitle, setDocTitle] = useState('Untitled Document'); // Default: Untitled Document
 
   const editableBoxRef = useRef(null); // Reference to the contentEditable box
+
+
+  const getCurrentUrl = () => {
+    return window.location.href.split('/').pop();
+  };
+
 
   const saveCaretPosition = () => {
     const selection = window.getSelection();
@@ -93,6 +100,38 @@ export default function Document() {
     const editableBox = editableBoxRef.current;
     setInputText(editableBox.innerText);
   };
+
+
+  useEffect(() => {
+    // Fetch the document content from the server
+    const fetchDocument = async () => {
+      const response = await fetch('http://127.0.0.1:3000/user/get_document', {
+        method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+          },
+        body: JSON.stringify({
+            uid: localStorage.getItem('read-ease-uid'),
+            document_id: getCurrentUrl(),
+          }),
+        });          
+      
+      if (response.status == 200) {
+        const data = await response.json();
+        console.log(data);
+      }
+    };
+      
+    try{
+      fetchDocument();
+    }
+    catch (error) {
+      console.error('Error fetching document:', error);
+    }
+
+
+    }, []);
 
   return (
     <div className="flex flex-col gap-8 p-6 max-w-4xl mx-auto">
