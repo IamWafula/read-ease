@@ -254,7 +254,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         async function getKeywords() {
             const { textContent, nodes, offsets } = retrieveText();
             try {
-                const response = await fetch('http://127.0.0.1:3000/process-text', {
+                const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
