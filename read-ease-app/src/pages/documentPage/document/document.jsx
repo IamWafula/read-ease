@@ -42,7 +42,7 @@ export default function Document() {
     console.log(localStorage.getItem('read-ease-token'));
 
     try {
-      const response = await fetch('http://127.0.0.1:3000/process-text', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export default function Document() {
   useEffect(() => {
     // Fetch the document content from the server
     const fetchDocument = async () => {
-      const response = await fetch('http://127.0.0.1:3000/user/get_document', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/get_document', {
         method: 'POST',
           headers: {
             'Content-Type': 'application/json',

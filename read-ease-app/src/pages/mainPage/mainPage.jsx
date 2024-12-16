@@ -17,7 +17,7 @@ function DocumentCard({ title, preview, count, isNew, documentId, onDelete }) {
 
   const handleClick = async () => {
     if (isNew) {
-      const response = await fetch('http://127.0.0.1:3000/user/add_document', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/add_document', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function MainPage() {
   // Fetch user documents
   useEffect(() => {
     async function fetchDocuments() {
-      const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/get_documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export default function MainPage() {
   }, []);
 
   const deleteDocument = async (documentId) => {
-    const response = await fetch('http://127.0.0.1:3000/user/delete_document', {
+    const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/delete_document', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
