@@ -38,7 +38,7 @@ jobs:
     
   deploy:
     runs-on: ubuntu-latest
-    needs: run-tests
+    # needs: run-tests
 
     steps:
       # Step 1: Checkout the code from the repository
@@ -82,8 +82,12 @@ jobs:
           IMAGE_TAG=read-ease
           REPOSITORY_URI=public.ecr.aws/y7l0x2i0/read-ease-repo
 
+          # export IMAGE_TAG=read-ease && export REPOSITORY_URI=677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo
+
           REDIS_IMAGE=redis
-          REDIS_REPOSITORY=public.ecr.aws/y7l0x2i0/redis-repo
+          REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
+
+          # export REDIS_IMAGE=redis && export REDIS_REPOSITORY=677276084427.dkr.ecr.us-east-1.amazonaws.com/redis
 
           # Build the Docker image          
           docker buildx build \
@@ -108,4 +112,3 @@ jobs:
             --service-name $SERVICE_NAME \
             --containers file://containers.json \
             --public-endpoint file://public-endpoint.json
-

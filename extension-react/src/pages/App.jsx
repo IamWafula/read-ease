@@ -9,6 +9,7 @@ function App() {
 
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [uid, setUid] = useState(null)
 
 
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ function App() {
       if (uid) {
         auth.currentUser.getIdToken().then((token) => {
           setToken(token);
+          setUid(uid)
         });
       }
 
@@ -119,7 +121,12 @@ function App() {
   
           chrome.tabs.sendMessage(
             tabs[0].id,
-            { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
+            { action: 'highlightWords', 
+              color: currentColor, 
+              opacity: currentOpacity, 
+              uid: uid,
+              auth_token : token
+            },
             (response) => {
               if (chrome.runtime.lastError) {
                 console.error('Error sending message:', chrome.runtime.lastError.message);

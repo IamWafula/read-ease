@@ -58,7 +58,7 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     async function fetchDocuments(user) {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URI+'/user/get_documents', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/get_documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function DocumentsPage() {
 
     console.log(localStorage.getItem('read-ease-token'));
 
-    const response = await fetch(process.env.REACT_APP_BACKEND_URI+'/user/add_document', {
+    const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/add_document', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

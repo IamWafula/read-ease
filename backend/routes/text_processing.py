@@ -8,7 +8,7 @@ from services.caching import cache_url, retrieve_cache_url
 
 import json
 
-text_processing_bp = Blueprint("text_processing", __name__)
+text_processing_bp = Blueprint("process-text", __name__)
 
 
 @text_processing_bp.route("/process-text", methods=["POST"])

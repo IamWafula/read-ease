@@ -9,7 +9,7 @@ def get_redis_client():
     load_dotenv()
 
     if os.getenv("ENV") == "production":
-        return redis.Redis(host="redis", port="6379")
+        pass
     else:
         return redis.Redis(host="localhost", port="6379")
 
@@ -19,7 +19,7 @@ def cache_url(url, summarized_data):
 
     if redis_client:
         redis_client.hset(
-            url,
+            repr(url),
             mapping={
                 "keywords": json.dumps(summarized_data["keywords"]),
                 "sentences": json.dumps(summarized_data["sentences"]),

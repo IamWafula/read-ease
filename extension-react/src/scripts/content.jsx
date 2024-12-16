@@ -248,6 +248,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "highlightWords") {
         const color = request.color || 'yellow';  // Default to yellow if no color provided
         const opacity = request.opacity || 1;
+        const uid = request.uid;
+        const token = request.auth_token;
         styleSheet.textContent = updateHighlightStyle(color, opacity);  // Update global style
 
         const currentUrl = window.location.href;
@@ -257,12 +259,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         async function getKeywords() {
             const { textContent, nodes, offsets } = retrieveText();
             try {
-                const response = await fetch('http://127.0.0.1:5000/process-text', {
+                const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization' : `Bearer ${token}`
                     },
-                    body: JSON.stringify({ "text": textContent })
+                    body: JSON.stringify({ 
+                        "text": textContent,
+                        "uid" : uid,
+                        "url" : currentUrl
+                     })
                 });
                 // Check if response is not OK
                 if (!response.ok) {

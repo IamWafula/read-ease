@@ -14,9 +14,10 @@ import Document from '../documentPage/document/document.jsx';
 function DocumentCard({ title, preview, count, isNew, documentId, onDelete }) {
   const navigate = useNavigate();
 
+
   const handleClick = async () => {
     if (isNew) {
-      const response = await fetch('http://127.0.0.1:3000/user/add_document', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/add_document', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ export default function MainPage() {
   // Fetch user documents
   useEffect(() => {
     async function fetchDocuments() {
-      const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
+      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/get_documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +101,7 @@ export default function MainPage() {
         setDocuments([
           { title: 'new', isNew: true },
           ...data.map(doc => ({
+            id: doc._id,
             title: doc.title,
             preview: doc.preview,
             count: doc.count,
@@ -113,7 +115,7 @@ export default function MainPage() {
   }, []);
 
   const deleteDocument = async (documentId) => {
-    const response = await fetch('http://127.0.0.1:3000/user/delete_document', {
+    const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/delete_document', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -200,17 +202,19 @@ export default function MainPage() {
   
           {/* Document Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {documents.map((doc, index) => (
-              <DocumentCard
+            {documents.map((doc, index) => {
+              return (
+                <DocumentCard                
                 key={index}
                 title={doc.title}
                 preview={doc.preview}
                 count={doc.count}
                 isNew={doc.isNew}
-                documentId={doc.documentId}
+                documentId={doc.id}
                 onDelete={deleteDocument} // Pass the delete function as a prop
               />
-            ))}
+              )
+            } )}
           </div>
         </div>
      </div>
