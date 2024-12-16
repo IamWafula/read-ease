@@ -11,118 +11,90 @@ import { useParams } from 'react-router-dom';
 import Document from '../documentPage/document/document.jsx';
 
 
+function DocumentCard({ title, preview, count, isNew, documentId }) {
+  const navigate = useNavigate();
 
+  const handleClick = async () => {
+    if (isNew) {
+      const response = await fetch('http://127.0.0.1:3000/user/add_document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+        },
+        body: JSON.stringify({
+          uid: localStorage.getItem('read-ease-uid'),
+        }),
+      });
 
-function DocumentCard ({ title, preview, count }) {
+      const data = await response.json();
 
-      const [navigateToDocument, setNavigateToDocument] = useState(false);
-      const [documentId, setDocumentId] = useState(null);
-
-      async function addDocument() {
-        const response = await fetch('http://127.0.0.1:3000/user/add_document', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
-          },
-          body: JSON.stringify({
-            uid: localStorage.getItem('read-ease-uid'),
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.document_id){
-
-          return data.document_id;
-
-        }
-
-        return null;
+      if (data.document_id) {
+        navigate(`/documents/${data.document_id}`);
       }
+    } else {
+      navigate(`/documents/${documentId}`);
+    }
+  };
 
-
-      return (
-        <div
-          onClick={ async () => {
-            
-            const documentId = await addDocument();
-            // const documentId = '675f837c84d3c59b5cf6071e'
-
-            if (documentId){
-              setDocumentId(documentId);
-              setNavigateToDocument(true);
-            }
-
-          
-          }}
-        >
-
-          {
-            navigateToDocument && 
-            <Navigate to={`/documents/${documentId}`} />
-          }
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-            {title === "new" ? (
-              <div className="flex flex-col items-center justify-center h-32">
-                <span className="text-gray-600">Create New Document</span>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{preview}</p>
-                <div className="text-red-500 font-medium">{count}</div>
-              </>
-            )}
-          </div>
+  return (
+    <div
+      onClick={handleClick}
+      className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+    >
+      {isNew ? (
+        <div className="flex flex-col items-center justify-center h-32">
+          <span className="text-gray-600">Create New Document</span>
         </div>
-      );
-      
-      
-
-    
+      ) : (
+        <>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{preview}</p>
+          <div className="text-red-500 font-medium">{count}</div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function MainPage() {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [documents, setDocuments] = useState([]);
 
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
-    // const [documents, setDocuments] = useState([]);
-
-    const documents = [
-        {
-          title: "new",
-          preview: "",
+  // Fetch user documents
+  useEffect(() => {
+    async function fetchDocuments() {
+      const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
         },
-    ];
+        body: JSON.stringify({
+          uid: localStorage.getItem('read-ease-uid'),
+        }),
+      });
 
-
-    useEffect(() => {
-      async function fetchDocuments(user) {
-        const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
-          },
-          body: JSON.stringify({
-            uid: localStorage.getItem('read-ease-uid'),
-          }),
-        });
-
-        if (response.status == 200){
-          const data = await response.json();
-          // setDocuments(data);
-          console.log(data)
-        }
-        
-        
+      if (response.status === 200) {
+        const data = await response.json();
+        // Add the "new document" option at the start of the documents list
+        setDocuments([
+          { title: 'new', isNew: true },
+          ...data.map(doc => ({
+            title: doc.title,
+            preview: doc.preview,
+            count: doc.count,
+            documentId: doc.document_id,
+          })),
+        ]);
       }
+    }
 
-      fetchDocuments();
-    }, []);
+    fetchDocuments();
+  }, []);
 
 
     
@@ -168,48 +140,45 @@ export default function MainPage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
-          {/* Sidebar */}
-          <div className="w-64 bg-gray-800 text-white p-4">
-            <h2 className="text-xl font-bold mb-4">Read-Ease</h2>
-            <ul>
-              <li className="mb-4"><Link to="/" className="hover:text-blue-300">My Read-Ease</Link></li>
-              <li className="mb-4"><Link to="/account" className="hover:text-blue-300">Account</Link></li>
-              <li><button onClick={handleSignOut} className="hover:text-blue-300">Sign out</button></li>
-            </ul>
-          </div>
-    
-          {/* Main Content */}
-          <div className="flex-1 p-8">
-            {/* Welcome Message */}
-            
-            {/* Search Bar */}
-            <div className="mb-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search documents..."
-                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            {/* Document Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {documents.map((doc, index) => (
-            <DocumentCard
-              key={index}
-              title={doc.title}
-              preview={doc.preview}
-              count={doc.count}
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Sidebar */}
+        <div className="w-64 bg-gray-800 text-white p-4">
+          <h2 className="text-xl font-bold mb-4">Read-Ease</h2>
+          <ul>
+            <li className="mb-4"><Link to="/" className="hover:text-blue-300">My Read-Ease</Link></li>
+            <li className="mb-4"><Link to="/account" className="hover:text-blue-300">Account</Link></li>
+            <li><button onClick={handleSignOut} className="hover:text-blue-300">Sign out</button></li>
+          </ul>
+        </div>
+  
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          {/* Search Bar */}
+          <div className="mb-8">
+            <input
+              type="text"
+              placeholder="Search documents..."
+              className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          ))}
+          </div>
+  
+          {/* Document Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {documents.map((doc, index) => (
+              <DocumentCard
+                key={index}
+                title={doc.title}
+                preview={doc.preview}
+                count={doc.count}
+                isNew={doc.isNew}
+                documentId={doc.documentId}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 
    
 
