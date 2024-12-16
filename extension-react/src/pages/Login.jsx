@@ -28,6 +28,7 @@ const Login = () => {
         const accessToken = urlParams.get('access_token'); // Retrieve the access token
 
         // Use the access token to create Firebase credential
+        console.log("access token", accessToken)
         const credential = GoogleAuthProvider.credential(null, accessToken);
         try {
           // Sign in the user with the credential

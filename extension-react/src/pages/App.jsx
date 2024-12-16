@@ -12,6 +12,8 @@ function App() {
   // State management
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [uid, setUid] = useState(null)
+
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
@@ -37,6 +39,7 @@ function App() {
       if (uid) {
         auth.currentUser.getIdToken().then((token) => {
           setToken(token);
+          setUid(uid)
         });
       }
       setUser(currentUser);
@@ -99,6 +102,41 @@ function App() {
               action: 'applyHighlightStyles',
               color: currentColor,
               opacity: currentOpacity,
+            },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                  console.error('Error sending message:', chrome.runtime.lastError.message);
+              } else if (response?.status === 'styles_updated') {
+                  console.log('Highlight styles updated successfully.');
+                  // Update last highlight settings
+                  setLastHighlightSettings((prev) => ({
+                    ...prev,
+                    color: currentColor,
+                    opacity: currentOpacity,
+                }));
+              } else {
+                  console.warn('Unexpected response:', response);
+              }
+          }
+      );
+
+        } else {
+          // No changes, do nothing
+          console.log('Highlight skipped: Settings unchanged.');
+        }
+      } else {
+        // Proceed to highlight the text by processing it again
+          setProgressLoading(true); 
+          setStatusText('Fetching words...');  
+          setStatusVisible(true);   
+  
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            { action: 'highlightWords', 
+              color: currentColor, 
+              opacity: currentOpacity, 
+              uid: uid,
+              auth_token : token
             },
             (response) => {
               if (chrome.runtime.lastError) {
