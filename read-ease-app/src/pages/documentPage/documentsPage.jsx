@@ -1,4 +1,3 @@
-// documentsPage.jsx
 import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
@@ -21,6 +20,8 @@ const getExampleDocument = () => ({
     }
 );
 
+
+
 const DocumentComponent = (document) => {
   return (
     <div className='flex flex-col'
@@ -34,7 +35,7 @@ const DocumentComponent = (document) => {
       }}
 
       onClick={() => {
-        window.location.href = `/documents/${document.document.id}`;
+        window.location.href = `/documents/${document.document._id}`;
       }}
     >
       <div className='flex flex-col bg-white p-4 shadow-md rounded h-4/5'>
@@ -53,62 +54,56 @@ const DocumentComponent = (document) => {
 
 
 export default function DocumentsPage() {
-  const {id} = useParams();
-  const [documents, setDocuments] = useState([
-    {
-      id: 1,
-      title: 'Example Document',
-    },
-    {
-      id: 2,
-      title: 'Example Document',
-    },
-    {
-      id: 3,
-      title: 'Example Document',
-    },
-    {
-      id: 4,
-      title: 'Example Document',
-    },
-    {
-      id: 5,
-      title: 'Example Document',
-    },
-    {
-      id: 6,
-      title: 'Example Document',
-    },
-    {
-      id: 7,
-      title: 'Example Document',
-    },
-    {
-      id: 8,
-      title: 'Example Document',
-    },
-    {
-      id: 9,
-      title: 'Example Document',
-    },
-    {
-      id: 10,
-      title: 'Example Document',
-    },
-  ]);
+  const [documents, setDocuments] = useState([]);
 
   useEffect(() => {
     async function fetchDocuments(user) {
-        return {};
-        // return setDocuments(getExampleDocument());
+      const response = await fetch('http://127.0.0.1:3000/user/get_documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+        },
+        body: JSON.stringify({
+          uid: localStorage.getItem('read-ease-uid'),
+        }),
+      });
 
-        const response = await fetch(`/api/documents/${id}`);
+      if (response.status == 200){
         const data = await response.json();
-        // setDocument(data);
+        setDocuments(data);
+      }
+      
+      
     }
 
-    // fetchDocuments();
+    fetchDocuments();
   }, []);
+
+  async function addDocument() {
+
+    console.log(localStorage.getItem('read-ease-token'));
+
+    const response = await fetch('http://127.0.0.1:3000/user/add_document', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
+      },
+      body: JSON.stringify({
+        uid: localStorage.getItem('read-ease-uid'),
+      }),
+    });
+    // const data = await response.json();
+    console.log(await response.text());
+
+    const newDocument = {
+    id: documents.length + 1,
+    title: 'New Document',
+    };
+    setDocuments([...documents, newDocument]);
+    // return data;
+  }
 
   return (
     <div className='flex flex-row flex-wrap'>
@@ -116,6 +111,25 @@ export default function DocumentsPage() {
       {documents.map((document) => (                  
         <DocumentComponent key={document.id} document={document} />
       ))}
+
+      <button
+        onClick={() => {
+          addDocument();
+          
+        }}
+        style={{
+          width: '300px',
+          height: '50px',
+          margin: '10px',
+          padding: '10px',
+          border: '1px solid black',
+          borderRadius: '10px',
+          backgroundColor: 'white',
+          cursor: 'pointer',
+        }}
+      >
+        Add Document
+      </button>
       
     </div>
   );

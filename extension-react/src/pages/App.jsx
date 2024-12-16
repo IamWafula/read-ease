@@ -8,10 +8,12 @@ import logoutIcon from '../assets/logout.png';
 
 // Main application component
 function App() {
+
   // State management
-  const [user, setUser] = useState(null); // Tracks authenticated user
-  const [loading, setLoading] = useState(true); // Loading state during authentication check
-  const [globalOpacity, setGlobalOpacity] = useState(1); // Tracks global opacity for highlights
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
     { color: '#FFD700', isColorPickerOpen: false } // Initial circle with default color
   ]);
@@ -30,11 +32,19 @@ function App() {
   // Authentication: Check if user is signed in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Auth state changed, currentUser:', currentUser);
-      setUser(currentUser); // Update user state
-      setLoading(false); // End loading state
+
+      const uid = currentUser ? currentUser.uid : null;
+      if (uid) {
+        auth.currentUser.getIdToken().then((token) => {
+          setToken(token);
+        });
+      }
+      setUser(currentUser);
+      setLoading(false);
     });
-    return () => unsubscribe(); // Cleanup subscription
+    console.log(user)
+    return () => unsubscribe();
+    
   }, []);
 
   // Render loading state
