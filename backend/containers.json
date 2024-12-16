@@ -1,8 +1,8 @@
 {
     "flask": {
-        "image": "677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo:latest",
+        "image": "677276084427.dkr.ecr.us-east-1.amazonaws.com/reade-ease-repo:read-ease",
         "ports": {
             "3000": "HTTP"
         }
-    }
+    }    
 }

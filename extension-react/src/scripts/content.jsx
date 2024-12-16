@@ -1,4 +1,3 @@
-
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
@@ -161,6 +160,7 @@ function highlightInPlace(phrases, nodes, offsets, textContent) {
     console.log('Highlighting process completed');
 }
 
+
 function boldKeywords(keywords, nodes, offsets, textContent) {
     console.log('Starting boldKeywords with keywords:', keywords);
 
@@ -169,6 +169,7 @@ function boldKeywords(keywords, nodes, offsets, textContent) {
 
     // Combine keywords into a single regex pattern
     const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
+
 
     let match;
     let matches = [];

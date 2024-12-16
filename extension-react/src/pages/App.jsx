@@ -8,6 +8,9 @@ import Highlight from './highlight.jsx';
 function App() {
 
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+
+
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
@@ -29,10 +32,23 @@ function App() {
   // Authentication (State + Effect)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Auth state changed, currentUser:', currentUser);
+
+      const uid = currentUser ? currentUser.uid : null;
+
+      if (uid) {
+        auth.currentUser.getIdToken().then((token) => {
+          setToken(token);
+        });
+      }
+
       setUser(currentUser);
+
+
       setLoading(false);
     });
+    
+    console.log(user)
+
     return () => unsubscribe();
   }, []);
 
