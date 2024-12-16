@@ -21,6 +21,8 @@ const Login = () => {
         const urlParams = new URLSearchParams(new URL(redirectUrl).hash.substring(1));
         const accessToken = urlParams.get('access_token');
 
+        console.log("access token", accessToken)
+
         const credential = GoogleAuthProvider.credential(null, accessToken);
         try {
           await signInWithCredential(auth, credential);
