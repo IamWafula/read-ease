@@ -1,8 +1,9 @@
-# React + Vite
+To run the extension, follow these steps:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+1. Run `npm install` to install the dependencies.
+2. Run `npm run dev` to start the development server.
+3. Open Google Chrome and navigate to the extensions page by typing `chrome://extensions/` in the address bar.
+4. Enable developer mode and click "Load unpacked".
+5. Select the `extension-react/dist` folder to load the extension.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Alternatively, if you don't want to run the server locally, you can load the extension from the pre-uploaded `dist` folder.
