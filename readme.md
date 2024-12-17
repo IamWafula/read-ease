@@ -2,6 +2,8 @@
 
 ReadEase is a versatile tool designed to enhance reading comprehension by providing advanced text highlighting features on two platforms: a browser extension and a web application.
 
+DEMO LINK : `https://youtu.be/J1FM4tdSyW4`
+
 ## Platforms and Features
 
 ### 1. Browser Extension
