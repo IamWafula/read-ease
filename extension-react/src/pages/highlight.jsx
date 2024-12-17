@@ -1,94 +1,81 @@
-// highlight.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 const Highlight = ({
-  globalOpacity, // Current global opacity for highlights
-  setGlobalOpacity, // Function to update the global opacity
-  setCircles, // Function to update the circle state
-  circles, // Array of highlight circles with color and state information
-  handleClick, // Function to handle single or double-click events
-  handleColorChange, // Function to update the circle color
-  progressBarColor, // Color of the progress bar
-  progressLoading, // Boolean to control progress bar visibility
-  statusText, // Text to display as the current status
-  statusVisible // Boolean to control the visibility of status text
+  globalOpacity,
+  setGlobalOpacity,
+  setCircles,
+  circles,
+  handleClick,
+  handleColorChange,
+  progressBarColor,
+  progressLoading,
+  statusText,
+  statusVisible,
+  keywords,
+  sentences
 }) => {
-  
-  // State and references for opacity slider
-  const sliderRef = useRef(null); // Reference to the SVG slider element
-  const [isDragging, setIsDragging] = useState(false); // Tracks if the opacity slider is being dragged
-  const [lastAngle, setLastAngle] = useState(null); // Tracks the last angle for drag direction
+  const sliderRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastAngle, setLastAngle] = useState(null);
 
-  // Function to calculate the angle for the opacity slider based on mouse movement
+  // Tabs state
+  const [activeTab, setActiveTab] = useState('vocab');
+
   const calculateAngle = (event) => {
-    if (!sliderRef.current) return 0; // Exit if the slider is not available
+    if (!sliderRef.current) return 0;
     const rect = sliderRef.current.getBoundingClientRect();
     const center = {
-      x: rect.left + rect.width / 2, // X-coordinate of the slider center
-      y: rect.top + rect.height / 2, // Y-coordinate of the slider center
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
     };
-
-    // Calculate the raw angle based on the mouse position
     let angle = Math.atan2(event.clientY - center.y, event.clientX - center.x) * (180 / Math.PI);
-    angle = (angle + 90) % 360; // Normalize the angle to the range 0-360
-
-    // Handle angle wrapping for smooth slider interaction
+    angle = (angle + 90) % 360;
     if (angle < 15) angle += 360;
     if (lastAngle !== null) {
       if (angle > lastAngle && angle - lastAngle > 180) {
-        angle = Math.max(angle, 15); // Prevent counterclockwise wrapping
+        angle = Math.max(angle, 15);
       } else if (angle < lastAngle && lastAngle - angle > 180) {
-        angle = Math.min(angle, 345); // Prevent clockwise wrapping
+        angle = Math.min(angle, 345);
       }
     }
-
-    // Clamp the angle within the allowed range (15° to 345°)
     const constrainedAngle = Math.min(Math.max(angle, 15), 345);
-    setLastAngle(constrainedAngle); // Save the constrained angle for future calculations
-
-    // Map the constrained angle to an opacity value (0-1)
-    const normalizedAngle = constrainedAngle - 15; // Offset to start at 15°
-    return parseFloat((normalizedAngle / 330).toFixed(2)); // Scale to [0, 1] with two decimal precision
+    setLastAngle(constrainedAngle);
+    const normalizedAngle = constrainedAngle - 15;
+    return parseFloat((normalizedAngle / 330).toFixed(2));
   };
 
-  // SVG path generator for drawing the arc
   const describeArc = (x, y, radius, startAngle, endAngle) => {
     const start = polarToCartesian(x, y, radius, endAngle);
     const end = polarToCartesian(x, y, radius, startAngle);
-    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1"; // Determine if arc is large
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
     return [
       "M", start.x, start.y,
       "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
     ].join(" ");
   };
 
-  // Helper function to convert polar coordinates to Cartesian
   const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0; // Adjust angle for SVG orientation
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     return {
-      x: centerX + (radius * Math.cos(angleInRadians)), // X-coordinate
-      y: centerY + (radius * Math.sin(angleInRadians))  // Y-coordinate
+      x: centerX + (radius * Math.cos(angleInRadians)),
+      y: centerY + (radius * Math.sin(angleInRadians))
     };
   };
 
-  // Calculate the position of the indicator on the slider arc based on opacity
   const getIndicatorPosition = (radius, opacity) => {
-    const startAngle = 15; // Start of the arc
-    const endAngle = 345; // End of the arc
-    const angle = startAngle + opacity * (endAngle - startAngle); // Map opacity to angle
-    return polarToCartesian(50, 50, radius, angle); // Convert to Cartesian coordinates
+    const startAngle = 15;
+    const endAngle = 345;
+    const angle = startAngle + opacity * (endAngle - startAngle);
+    return polarToCartesian(50, 50, radius, angle);
   };
-
-  // Convert a hex color to RGBA with specified opacity
+  
   const hexToRgba = (hex, opacity) => {
-    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16)); // Extract RGB values
-    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`; // Return RGBA string
+    const rgbValues = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+    return `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, ${opacity})`;
   };
 
-  // Predefined set of color options for the speech bubble
   const colorOptions = ['#FF00A2','#FF0000', '#FF9000', '#FFC900', '#FFFF00', '#00FF00', '#00CFFF', '#9B00FF'];
 
-  // Effect to handle clicks outside the speech bubble
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (!event.target.closest(".speech-bubble") && !event.target.closest(".highlight-circle")) {
@@ -97,26 +84,36 @@ const Highlight = ({
         );
       }
     };
-    document.addEventListener("click", handleOutsideClick); // Add event listener for clicks
-    return () => document.removeEventListener("click", handleOutsideClick); // Cleanup on unmount
-  }, []);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [setCircles]);
 
-  // Event handlers for slider interaction
-  const handleMouseDown = () => setIsDragging(true); // Start dragging
+  const handleMouseDown = () => setIsDragging(true);
   const handleMouseMove = (event) => {
-    if (isDragging) setGlobalOpacity(calculateAngle(event)); // Update opacity during drag
+    if (isDragging) setGlobalOpacity(calculateAngle(event));
   };
-  const handleMouseUp = () => setIsDragging(false); // Stop dragging
+  const handleMouseUp = () => setIsDragging(false);
 
-  // Effect to detect mouse release outside the slider
-  React.useEffect(() => {
+  useEffect(() => {
     const handleMouseUpOutside = () => setIsDragging(false);
     document.addEventListener('mouseup', handleMouseUpOutside);
     return () => document.removeEventListener('mouseup', handleMouseUpOutside);
   }, []);
 
   return ( 
-    <div id="body" onClick={(e) => e.stopPropagation()}> {/* Prevent propagation of clicks */}
+    <div id="body" onClick={(e) => e.stopPropagation()}>
+      {/* Heading and Instructions */}
+      <div className="header">
+        <h1 className="header-title">ReadEase</h1>
+        <div className="instructions">
+          <ul>
+            <li><strong>Single Click</strong> the circle to highlight important text on the page.</li>
+            <li><strong>Double Click</strong> the circle to choose a highlight color.</li>
+            <li><strong>Drag Around</strong> the slider to adjust highlight <strong>opacity</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
       <div className="parent-container">
         <div className="highlight-opacity-container">
           <svg
@@ -129,7 +126,6 @@ const Highlight = ({
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
           >
-            {/* Gradient for opacity slider */}
             <defs>
               <linearGradient id="opacityGradient" gradientUnits="objectBoundingBox">
                 <stop offset="0%" stopColor="rgba(0, 0, 0, 0)" />
@@ -137,7 +133,6 @@ const Highlight = ({
               </linearGradient>
             </defs>
 
-            {/* Active arc representing current opacity */}
             <path
               d={describeArc(50, 50, 45, 15, 15 + globalOpacity * 330)}
               stroke="darkgray"
@@ -146,7 +141,6 @@ const Highlight = ({
               fill="none"
             />
 
-            {/* Inactive arc for the remainder of the slider */}
             <path
               d={describeArc(50, 50, 45, 15 + globalOpacity * 330, 345)}
               stroke="#d3d3d3"
@@ -155,7 +149,6 @@ const Highlight = ({
               fill="none"
             />
 
-            {/* Slider indicator */}
             {(() => {
               const position = getIndicatorPosition(45, globalOpacity);
               return (
@@ -171,7 +164,6 @@ const Highlight = ({
             })()}
           </svg>
 
-          {/* Render highlight circles */}
           {circles.map((circle, index) => (
             <div
               key={`circle-${index}`}
@@ -179,11 +171,10 @@ const Highlight = ({
               aria-label={`highlight-circle-${index}`}
               style={{ backgroundColor: hexToRgba(circle.color, globalOpacity) }}
               onClick={(e) => {
-                e.stopPropagation(); // Prevent bubbling
-                handleClick(index); // Handle click events
+                e.stopPropagation();
+                handleClick(index);
               }}
             >
-              {/* Render speech bubble for color options */}
               {circle.isSpeechBubbleOpen && (
                 <div className="speech-bubble">
                   {colorOptions.map((color, i) => (
@@ -192,8 +183,8 @@ const Highlight = ({
                       className="color-option"
                       style={{ backgroundColor: color }}
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent bubbling
-                        handleColorChange(index, color); // Update circle color
+                        e.stopPropagation();
+                        handleColorChange(index, color);
                       }} 
                     ></div>
                   ))}
@@ -203,7 +194,6 @@ const Highlight = ({
           ))}
         </div>
 
-        {/* Progress bar */}
         {progressLoading && (
           <div className="progress-bar">
             <div 
@@ -212,9 +202,46 @@ const Highlight = ({
             ></div>
           </div>
         )}
-
-        {/* Status text */}
         <div className={`status-text ${statusVisible ? '' : 'hidden'}`}>{statusText}</div>
+
+        {/* Tabs Section */}
+        <div className="tabs-container">
+          <div className="tabs">
+            <button 
+              className={activeTab === 'vocab' ? 'tab-button active' : 'tab-button'} 
+              onClick={() => setActiveTab('vocab')}
+            >
+              Vocabulary
+            </button>
+            <button 
+              className={activeTab === 'notes' ? 'tab-button active' : 'tab-button'} 
+              onClick={() => setActiveTab('notes')}
+            >
+              Notes
+            </button>
+          </div>
+
+          <div className="tab-content">
+            {activeTab === 'vocab' && (
+              <ul className="data-list">
+                {keywords.length > 0 ? (
+                  keywords.map((word, i) => <li key={i}>{word}</li>)
+                ) : (
+                  <li>No vocabulary found.</li>
+                )}
+              </ul>
+            )}
+            {activeTab === 'notes' && (
+              <ul className="data-list">
+                {sentences.length > 0 ? (
+                  sentences.map((sentence, i) => <li key={i}>{sentence}</li>)
+                ) : (
+                  <li>No notes found.</li>
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -54,4 +54,11 @@ htmlcov/
 *.bak
 *~
 
-readease/
+# Node modules
+node_modules/
+
+#/node_modules/*
+extension-react/node_modules/*
+extension-react/dist/*
+backend/utils/firebaseAccountKey.json
+extension-react/src/config.js

@@ -6,91 +6,80 @@ import Login from './login.jsx';
 import Highlight from './highlight.jsx';
 import logoutIcon from '../assets/logout.png';
 
-// Main application component
 function App() {
-
-  // State management
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [uid, setUid] = useState(null)
+  const [uid, setUid] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [globalOpacity, setGlobalOpacity] = useState(1);
   const [circles, setCircles] = useState([
-    { color: '#FFD700', isColorPickerOpen: false } // Initial circle with default color
+    { color: '#FFD700', isColorPickerOpen: false }
   ]);
-  const [progressBarColor, setProgressBarColor] = useState("#FFD700"); // Color of progress bar
-  const [progressLoading, setProgressLoading] = useState(false); // Tracks progress bar visibility
-  const [statusText, setStatusText] = useState(''); // Text displayed for status messages
-  const [statusVisible, setStatusVisible] = useState(true); // Controls visibility of status messages
-  const [clickTimeout, setClickTimeout] = useState(null); // Tracks single vs double-click events
+  const [progressBarColor, setProgressBarColor] = useState("#FFD700");
+  const [progressLoading, setProgressLoading] = useState(false);
+  const [statusText, setStatusText] = useState('');
+  const [statusVisible, setStatusVisible] = useState(true);
+  const [clickTimeout, setClickTimeout] = useState(null);
   const [lastHighlightSettings, setLastHighlightSettings] = useState({
-    color: null, // Last used highlight color
-    opacity: null, // Last used opacity
-    pageUrl: null, // URL of the last highlighted page
-    highlighted: false, // Whether text was highlighted on the last interaction
+    color: null,
+    opacity: null,
+    pageUrl: null,
+    highlighted: false,
   });
 
-  // Authentication: Check if user is signed in
+  // NEW STATES for Vocabulary and Notes
+  const [keywords, setKeywords] = useState([]);
+  const [sentences, setSentences] = useState([]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-
       const uid = currentUser ? currentUser.uid : null;
       if (uid) {
         auth.currentUser.getIdToken().then((token) => {
           setToken(token);
-          setUid(uid)
+          setUid(uid);
         });
       }
       setUser(currentUser);
       setLoading(false);
     });
-    console.log(user)
     return () => unsubscribe();
-    
   }, []);
 
-  // Render loading state
   if (loading) return <div>Loading...</div>;
-
-  // Render login component if user is not authenticated
   if (!user) return <Login />;
 
-  // Handles user logout
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully.');
-        setUser(null); // Clear user state
+        setUser(null);
       })
       .catch((error) => {
         console.error('Error signing out:', error);
       });
   };
 
-  // Handles single-click events on highlight circles
   const handleCircleClick = (index) => {
-    const currentColor = circles[0].color; // Get current highlight color
-    const currentOpacity = globalOpacity; // Get current opacity
+    const currentColor = circles[0].color;
+    const currentOpacity = globalOpacity;
 
-    // Query the active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
         console.error('No active tab found.');
         setStatusText('No active tab found.');
         setStatusVisible(true);
-        setTimeout(() => setStatusVisible(false), 2000); // Hide status message
+        setTimeout(() => setStatusVisible(false), 2000);
         return;
       }
 
       const currentPageUrl = tabs[0].url;
 
-      // Check if the current page has already been highlighted
       if (
         lastHighlightSettings.highlighted &&
         lastHighlightSettings.pageUrl === currentPageUrl
       ) {
-        // Update highlight styles if color or opacity has changed
         if (
           lastHighlightSettings.color !== currentColor ||
           lastHighlightSettings.opacity !== currentOpacity
@@ -102,41 +91,6 @@ function App() {
               action: 'applyHighlightStyles',
               color: currentColor,
               opacity: currentOpacity,
-            },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                  console.error('Error sending message:', chrome.runtime.lastError.message);
-              } else if (response?.status === 'styles_updated') {
-                  console.log('Highlight styles updated successfully.');
-                  // Update last highlight settings
-                  setLastHighlightSettings((prev) => ({
-                    ...prev,
-                    color: currentColor,
-                    opacity: currentOpacity,
-                }));
-              } else {
-                  console.warn('Unexpected response:', response);
-              }
-          }
-      );
-
-        } else {
-          // No changes, do nothing
-          console.log('Highlight skipped: Settings unchanged.');
-        }
-      } else {
-        // Proceed to highlight the text by processing it again
-          setProgressLoading(true); 
-          setStatusText('Fetching words...');  
-          setStatusVisible(true);   
-  
-          chrome.tabs.sendMessage(
-            tabs[0].id,
-            { action: 'highlightWords', 
-              color: currentColor, 
-              opacity: currentOpacity, 
-              uid: uid,
-              auth_token : token
             },
             (response) => {
               if (chrome.runtime.lastError) {
@@ -157,14 +111,19 @@ function App() {
           console.log('Highlight skipped: Settings unchanged.');
         }
       } else {
-        // Highlight text if not already highlighted
-        setProgressLoading(true); // Show progress bar
-        setStatusText('Fetching words...'); // Set status text
+        setProgressLoading(true);
+        setStatusText('Fetching words...');
         setStatusVisible(true);
 
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: 'highlightWords', color: currentColor, opacity: currentOpacity },
+          {
+            action: 'highlightWords',
+            color: currentColor,
+            opacity: currentOpacity,
+            uid: uid,
+            auth_token: token
+          },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error('Error sending message:', chrome.runtime.lastError.message);
@@ -176,17 +135,23 @@ function App() {
             }
 
             if (response?.status === 'highlighted') {
-              console.log('Highlighting complete, hiding progress bar');
+              console.log('Highlighting complete');
               setProgressLoading(false);
               setStatusText('Highlighting complete!');
               setStatusVisible(true);
               setTimeout(() => setStatusVisible(false), 1000);
+
               setLastHighlightSettings({
                 color: currentColor,
                 opacity: currentOpacity,
                 pageUrl: currentPageUrl,
                 highlighted: true,
               });
+
+              // Store returned keywords and sentences
+              setKeywords(response.keywords || []);
+              setSentences(response.sentences || []);
+
             } else {
               console.warn('Unexpected response:', response);
               setProgressLoading(false);
@@ -197,7 +162,6 @@ function App() {
     });
   };
 
-  // Handles double-click events to toggle the color picker
   const handleDoubleClick = (index) => {
     console.log('Double click detected for toggling color picker:', index);
     setCircles((prevCircles) =>
@@ -210,22 +174,20 @@ function App() {
     );
   };
 
-  // Manages click timing for single vs. double-click differentiation
   const handleClick = (index) => {
     if (clickTimeout) {
-      clearTimeout(clickTimeout); // Cancel single-click timeout
+      clearTimeout(clickTimeout);
       setClickTimeout(null);
-      handleDoubleClick(index); // Handle double-click
+      handleDoubleClick(index);
     } else {
       const timeout = setTimeout(() => {
-        handleCircleClick(index); // Handle single-click
+        handleCircleClick(index);
         setClickTimeout(null);
-      }, 550); // Timeout to differentiate clicks
+      }, 550);
       setClickTimeout(timeout);
     }
   };
 
-  // Updates color of a specific circle
   const handleColorChange = (index, color) => {
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
@@ -235,10 +197,9 @@ function App() {
         return circle;
       })
     );
-    setProgressBarColor(color); // Update progress bar color
+    setProgressBarColor(color);
   };
 
-  // Updates global opacity for highlights
   const handleOpacityChange = (event) => {
     const newOpacity = parseFloat(event.target.value);
     setGlobalOpacity(newOpacity);
@@ -277,6 +238,8 @@ function App() {
           progressLoading={progressLoading}
           statusText={statusText}
           statusVisible={statusVisible}
+          keywords={keywords}
+          sentences={sentences}
         />
       ) : (
         <Login />

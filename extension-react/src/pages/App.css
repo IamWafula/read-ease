@@ -1,20 +1,18 @@
-/* General Body Styling */
+/* Make the popup larger and visually appealing */
 body {
-  width: 150px;
-  height: 150px;
+  width: 320px;
+  height: 600px;
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   margin: 0;
-  background-color: #ffffff;
+  background: linear-gradient(to bottom right, #ffd1dc, #fff4d4);
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
   position: relative;
 }
 
-/* Styling for the redirect text link */
 .redirect-text {
   position: absolute;
   top: 14px;
@@ -34,7 +32,6 @@ body {
   cursor: pointer;
 }
 
-/* Styling for the logout icon */
 .logout-icon {
   position: absolute;
   top: 10px;
@@ -49,17 +46,47 @@ body {
   transform: scale(1.1);
 }
 
-/* Parent container for alignment */
+/* Use flex to allow dynamic resizing */
 .parent-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
+  justify-content: flex-start;
   width: 100%;
+  height: calc(100% - 150px); /* Reserve some space for header, instructions, etc. */
 }
 
-/* Highlight and Opacity Bar Container */
+.header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  font-size: 16px;
+  margin: 0 0 5px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.instructions {
+  font-size: 10px;
+  color: #444;
+  text-align: left;
+  margin: 0 auto;
+  width: 90%;
+  line-height: 1.2em;
+}
+
+.instructions ul {
+  list-style-type: square;
+  margin: 0;
+  padding: 0;
+}
+
+.instructions li {
+  margin-bottom: 3px;
+}
+
 .highlight-opacity-container {
   position: relative;
   width: 60%;
@@ -67,10 +94,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  top: 10px;
+  margin-bottom: 10px;
 }
 
-/* Styling for the highlight circle */
 .highlight-circle {
   width: 50%;
   height: 50%;
@@ -83,22 +109,6 @@ body {
   z-index: 2;
 }
 
-/* Circular opacity slider */
-.custom-opacity-slider {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  border-radius: 50%;
-  border: 3px solid #d3d3d3;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
-}
-
-/* Color Palette Styles */
 .speech-bubble {
   position: absolute;
   bottom: -80px;
@@ -128,13 +138,12 @@ body {
   transform: scale(1.2);
 }
 
-/* Progress Bar Styles */
 .progress-bar {
   position: relative;
   width: 80%;
   height: 4px;
   background-color: #e0e0e0;
-  margin-top: 20px;
+  margin-top: 10px;
   overflow: hidden;
 }
 
@@ -156,7 +165,6 @@ body {
   }
 }
 
-/* Status Text */
 .status-text {
   font-size: 10px;
   color: #979292;
@@ -171,9 +179,66 @@ body {
   opacity: 0;
 }
 
-/* Highlights */
 .read-ease-highlight {
   color: inherit !important;
   background-color: rgba(255, 215, 0, 0.5);
   border-radius: 2px;
+}
+
+/* Tabs Container: Use flex to allow it to expand and fill space */
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  flex: 1;
+  margin-top: 10px;
+  /* This ensures the tabs section will take all remaining space */
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.tab-button {
+  font-size: 10px;
+  padding: 5px;
+  background: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.tab-button.active {
+  background: #cfcfcf;
+  font-weight: bold;
+}
+
+.tab-button:hover {
+  background: #e0e0e0;
+}
+
+/* Make tab-content flexible and fill remaining vertical space */
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  background: #fff;
+  font-size: 10px;
+  box-sizing: border-box;
+}
+
+.data-list {
+  list-style-type: disc;
+  padding-left: 15px;
+  margin: 0;
+  color: #333;
 }
