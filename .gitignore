@@ -62,3 +62,21 @@ extension-react/node_modules/*
 extension-react/dist/*
 backend/utils/firebaseAccountKey.json
 extension-react/src/config.js
+
+# Node modules and build artifacts
+node_modules/
+dist/
+build/
+
+# Environment variables and config files containing secrets
+.env
+.env.*
+backend/utils/firebaseAccountKey.json
+extension-react/src/config.js
+
+# Ignore any additional secret JSON files or private keys
+*.json
+!package.json # Don’t ignore package.json itself
+
+# If using firebase service account keys
+serviceAccountKey.json
