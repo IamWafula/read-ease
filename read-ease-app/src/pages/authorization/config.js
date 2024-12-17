@@ -1,5 +1,5 @@
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    apiKey: "AIzaSyC47y3u6oM8P41MRMu7qyC6e6dn1oSpJt8",
     authDomain: "cs162readease.firebaseapp.com",
     projectId: "cs162readease",
     storageBucket: "cs162readease.firebasestorage.app",
