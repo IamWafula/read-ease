@@ -17,6 +17,7 @@ async def process_text():
     data = request.get_json()
     text = data["text"]
     url = data.get("url")
+    url = None
 
     if url:
         # Check if the URL is already cached

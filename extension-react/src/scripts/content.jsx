@@ -6,6 +6,11 @@ console.log('Content script loaded.');
 const styleSheet = document.createElement("style");
 document.head.appendChild(styleSheet);
 
+function getWikipediaText() {
+    const text = document.getElementById("bodyContent").innerText;
+    return text;
+}
+
 
 // Function for highlights and bolding
 function updateHighlightStyle(color, opacity) {
