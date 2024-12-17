@@ -289,14 +289,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const endTime = performance.now();
                     console.log(`Highlighting and bolding completed in ${(endTime - startTime).toFixed(2)}ms`);
                 }
+            sendResponse({status: "highlighted"});
             } catch (error) {
                 console.error('Error fetching or processing data:', error);
                 alert('Failed to fetch data. Please check your connection or try again later.');
+                sendResponse({ status: "error", message: error.message });
             }
         }
         
         getKeywords();
-        sendResponse({ status: "highlighted" });
+        return true;
     } else if (request.action === "applyHighlightStyles") {
         const color = request.color || 'yellow';  // Default to yellow if no color provided
         const opacity = request.opacity || 1;
@@ -310,5 +312,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // No need to keep the listener alive for asynchronous response
         return false;
     }
-    return true;
+    return false;
 });

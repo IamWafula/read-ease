@@ -139,28 +139,39 @@ function App() {
             color: currentColor,
             opacity: currentOpacity,
             uid: uid,
-            auth_token: token,
+            auth_token: token
           },
           (response) => {
             if (chrome.runtime.lastError) {
-              console.error(
-                'Error sending message:',
-                chrome.runtime.lastError.message
-              );
-            } else if (response?.status === 'highlighted') {
-              console.log('Highlighting complete.');
-              setLastHighlightSettings((prev) => ({
-                ...prev,
+              console.error('Error sending message:', chrome.runtime.lastError.message);
+              setProgressLoading(false);
+              setStatusText('Error fetching words.');
+              setTimeout(() => setStatusVisible(false), 1000);
+              return;
+            }
+        
+            if (response?.status === 'highlighted') {
+              setProgressLoading(false);
+              setStatusText('Highlighting complete!');
+              setStatusVisible(true);
+              setTimeout(() => setStatusVisible(false), 1000);
+        
+              setLastHighlightSettings({
                 color: currentColor,
                 opacity: currentOpacity,
                 pageUrl: currentPageUrl,
                 highlighted: true,
-              }));
+              });
             } else {
               console.warn('Unexpected response:', response);
+              // Ensure progress bar is hidden even if response is unexpected
+              setProgressLoading(false);
+              setStatusText('Unexpected response.');
+              setStatusVisible(true);
+              setTimeout(() => setStatusVisible(false), 1000);
             }
           }
-        );
+        );        
       }
     });
   };
