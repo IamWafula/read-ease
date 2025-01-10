@@ -22,6 +22,9 @@ def create_highlighted_page(image, data):
     # Create a drawing object
     draw = ImageDraw.Draw(image)
 
+    # Create a semi-transparent overlay
+    overlay = Image.new("RGBA", image.size, (255, 255, 255, 0))
+
     # Loop through each row in the data
     for index, row in data.iterrows():
 
@@ -37,7 +40,22 @@ def create_highlighted_page(image, data):
         height = row["height"]
 
         # Draw a rectangle around the word
-        draw.rectangle([left, top, left + width, top + height], outline="red", width=2)
+        # draw.rectangle(
+        #     [left, top, left + width, top + height],
+        #     outline="red",
+        #     width=2,
+        # )
+
+        overlay_draw = ImageDraw.Draw(overlay)
+        overlay_draw.rectangle(
+            [left, top, left + width, top + height],
+            fill=(229, 235, 52, 1),
+        )
+
+        # Composite the overlay with the original image
+        image = Image.alpha_composite(image.convert("RGBA"), overlay)
+
+    image = image.convert("RGB")
 
     return image
 
@@ -65,24 +83,10 @@ for page_num, image in enumerate(images, start=1):
     # Append to word data
     word_data.append(ocr_data)
 
-    page_image = image.convert("RGB")
-    draw_page = ImageDraw.Draw(page_image)
-
-    # Loop through each row in the data
-    for index, row in ocr_data.iterrows():
-        # Get the bounding box coordinates
-        left = row["left"]
-        top = row["top"]
-        width = row["width"]
-        height = row["height"]
-
-        # Draw a rectangle around the word
-        draw_page.rectangle(
-            [left, top, left + width, top + height], outline="red", width=2
-        )
-
+    # Create a highlighted page
+    highlighted_page = create_highlighted_page(image, ocr_data)
     # Save the image
-    page_image.save(f"page_{page_num}.jpg")
+    highlighted_page.save(f"highlighted_page_{page_num}.jpg")
 
 
 # Combine data from all pages into a single DataFrame
