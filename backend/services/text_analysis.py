@@ -23,12 +23,9 @@ async def generate_analysis(text):
 
         1. Keywords extraction rules:
             - Extract the most important keywords or phrases
-            - Each keyword should be 1-3 words maximum
+            - Each keywords should be a single word or a phrase
             - Include only nouns, proper names, and technical terms
-            - Exclude common words and generic verbs
-            - Keywords should be lowercase unless they are proper nouns
-            - Sort keywords alphabetically
-            - Remove any punctuation from keywords
+            - Exclude common words and generic verbs            
 
         2. Key sentences extraction rules:
             - Extract the most important sentences
