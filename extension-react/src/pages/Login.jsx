@@ -5,11 +5,13 @@ import { clientId } from '../config';
 
 // Login component to handle Google OAuth authentication
 const Login = () => {
+
   // Function to handle the login process using Google's OAuth flow
   const handleLogin = () => {
     // Google OAuth 2.0 URL for authentication
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=https://${chrome.runtime.id}.chromiumapp.org/&response_type=token&scope=email%20profile%20openid`;
 
+    console.log("starting login")
     // Launch the Google authentication flow
     chrome.identity.launchWebAuthFlow(
       {
@@ -19,6 +21,8 @@ const Login = () => {
       async (redirectUrl) => {
         // Handle errors during the authentication process
         if (chrome.runtime.lastError || redirectUrl?.includes('access_denied')) {
+          
+          // TODO: Log Errors
           console.error('Auth error:', chrome.runtime.lastError); // Log the error
           return; // Exit if there was an error or the user denied access
         }
@@ -28,14 +32,14 @@ const Login = () => {
         const accessToken = urlParams.get('access_token'); // Retrieve the access token
 
         // Use the access token to create Firebase credential
-        console.log("access token", accessToken)
         const credential = GoogleAuthProvider.credential(null, accessToken);
         try {
           // Sign in the user with the credential
           await signInWithCredential(auth, credential);
-          console.log('User signed in successfully.');
           // User is now authenticated
         } catch (error) {
+          // TODO: Log Errors
+          
           console.error('Error during sign-in:', error); // Handle sign-in errors
         }
       }

@@ -9,7 +9,11 @@ import os
 import json
 
 # import text analysis service
-from text_analysis import generate_analysis, generate_analysis_groq
+from text_analysis import (
+    generate_analysis,
+    generate_analysis_groq,
+    generate_analysis_sentence_rank,
+)
 
 # async imports
 import asyncio
@@ -180,43 +184,13 @@ async def main():
 
                     continue
 
-            # region deprecated single text draw
-
-            # TODO: check if the rest of the sentence is in the dictionary
-            # insert code here to check the rest of the sentence
-            # could possibly include multiple pages if the sentence is long, maybe max 2 pages
-            # check if the next words are in the dictionary
-            # if they whole sentence is in the dictionary, highlight the sentence from the current index
-
-            # # if all_present:
-            # # Get the bounding box coordinates
-            # left = row["left"]
-            # top = row["top"]
-            # width = row["width"]
-            # height = row["height"]
-
-            # OPACITY = 128
-            # # create an overlay with the bounding box
-            # overlay_draw = ImageDraw.Draw(overlay)
-            # overlay_draw.rectangle(
-            #     [left, top, left + width, top + height],
-            #     fill=(229, 235, 52, OPACITY),
-            # )
-
-            # # Composite the overlay with the original image
-            # image = Image.alpha_composite(image.convert("RGBA"), overlay)
-
-            index += 1
-
-            # endregion
-
         # Convert the image back to RGB
         image = image.convert("RGB")
 
         return image
 
     # Path to the PDF file
-    pdf_path = "example1.pdf"
+    pdf_path = "Principles_Art_Trimmed.pdf"
     csv_path = "word_data.csv"
 
     if os.path.exists(csv_path):
@@ -267,23 +241,38 @@ async def main():
 
     full_text = final_data.text.str.cat(sep=" ")
 
+    # save full text to file
+    with open("full_text.txt", "w") as f:
+        f.write(full_text)
+
     # check if text analysis has been done
 
-    if os.path.exists("analysis.pkl"):
+    if os.path.exists("analysis.pkl") and os.path.exists("analysis_rank.pkl"):
         with open("analysis.pkl", "rb") as f:
             analysis = pickle.load(f)
+
+        with open("analysis_rank.pkl", "rb") as f:
+            analysis_rank = pickle.load(f)
     else:
         # Get analysis
-        analysis = await generate_analysis_groq(full_text)
+        analysis = await generate_analysis(full_text)
+        analysis_rank = await generate_analysis_sentence_rank(full_text)
         with open("analysis.pkl", "wb") as f:
             pickle.dump(analysis, f)
 
+        with open("analysis_rank.pkl", "wb") as f:
+            pickle.dump(analysis_rank, f)
+
+    pprint.pprint(analysis_rank)
+
     # get topic sentences
-    sentences = analysis["sentences"]
+
+    # sentences = analysis["sentences"]
+
+    # only highlight sentences that have high rank
+    sentences = [i[0] for i in analysis_rank["sentences"] if i[1] == "high"]
+
     keywords = analysis["keywords"]
-
-    pprint.pprint(analysis)
-
     # # get individual words words in the sentences
     words_to_highlight = [i for i in sentences if len(i.split()) > 1]
 
@@ -323,7 +312,6 @@ async def main():
         print(f"Page {page_num} dimensions: {width} x {height}")
 
         # Create a highlighted page
-
         next_image = None
         next_ocr_data = None
         if idx < num_pages - 1:

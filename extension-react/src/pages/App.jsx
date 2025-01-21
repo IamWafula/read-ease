@@ -49,6 +49,7 @@ function App() {
     return () => unsubscribe();
     
   }, []);
+  
 
   // Render loading state
   if (loading) return <div>Loading...</div>;
@@ -67,6 +68,41 @@ function App() {
         console.error('Error signing out:', error);
       });
   };
+
+  const applyHighlightStyles = (color, opacity) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        {
+          action: 'applyHighlightStyles',
+          color: color,
+          opacity: opacity,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+
+            // TODO: Log errors
+            // console.error(
+            //   'Error sending message:',
+            //   chrome.runtime.lastError.message
+            // );
+          } else if (response?.status === 'styles_updated') {
+                      
+            // Update last highlight settings
+            setLastHighlightSettings((prev) => ({
+              ...prev,
+              color: color,
+              opacity: opacity,
+            }));
+          } else {
+            // TODO: Log unexpected responses
+            // console.warn('Unexpected response:', response);
+          }
+        }
+      );
+    });
+  }
+
 
   // Handles single-click events on highlight circles
   const handleCircleClick = (index) => {
@@ -91,41 +127,23 @@ function App() {
         lastHighlightSettings.pageUrl === currentPageUrl
       ) {
         // Update highlight styles if color or opacity has changed
-        if (
-          lastHighlightSettings.color !== currentColor ||
-          lastHighlightSettings.opacity !== currentOpacity
-        ) {
-          console.log('Updating highlight styles...');
-          chrome.tabs.sendMessage(
-            tabs[0].id,
-            {
-              action: 'applyHighlightStyles',
-              color: currentColor,
-              opacity: currentOpacity,
-            },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.error(
-                  'Error sending message:',
-                  chrome.runtime.lastError.message
-                );
-              } else if (response?.status === 'styles_updated') {
-                console.log('Highlight styles updated successfully.');
-                // Update last highlight settings
-                setLastHighlightSettings((prev) => ({
-                  ...prev,
-                  color: currentColor,
-                  opacity: currentOpacity,
-                }));
-              } else {
-                console.warn('Unexpected response:', response);
-              }
-            }
-          );
-        } else {
-          // No changes, do nothing
-          console.log('Highlight skipped: Settings unchanged.');
-        }
+
+        // Apply new highlight styles anyways
+        applyHighlightStyles(currentColor, currentOpacity);
+
+        // if (
+        //   lastHighlightSettings.color !== currentColor ||
+        //   lastHighlightSettings.opacity !== currentOpacity
+        // ) {
+                  
+        //   // Apply new highlight styles
+        //   applyHighlightStyles(currentColor, currentOpacity);
+
+        // } else {
+        //   // No changes, do nothing
+        //   console.log(lastHighlightSettings, currentColor, currentOpacity);
+        //   console.log('Highlight skipped: Settings unchanged.');
+        // }
       } else {
         // Proceed to highlight the text by processing it again
         setProgressLoading(true);
@@ -143,7 +161,8 @@ function App() {
           },
           (response) => {
             if (chrome.runtime.lastError) {
-              console.error('Error sending message:', chrome.runtime.lastError.message);
+              // TODO : Log errors
+              // console.error('Error sending message:', chrome.runtime.lastError.message);
               setProgressLoading(false);
               setStatusText('Error fetching words.');
               setTimeout(() => setStatusVisible(false), 1000);
@@ -163,7 +182,8 @@ function App() {
                 highlighted: true,
               });
             } else {
-              console.warn('Unexpected response:', response);
+              // TODO: Log unexpected responses
+              // console.warn('Unexpected response:', response);
               // Ensure progress bar is hidden even if response is unexpected
               setProgressLoading(false);
               setStatusText('Unexpected response.');
@@ -178,10 +198,9 @@ function App() {
 
   // Handles double-click events to toggle the color picker
   const handleDoubleClick = (index) => {
-    console.log('Double click detected for toggling color picker:', index);
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
-        if (i === index) {
+        if (i === index) {           
           return { ...circle, isSpeechBubbleOpen: !circle.isSpeechBubbleOpen };
         }
         return { ...circle, isSpeechBubbleOpen: false };
@@ -203,12 +222,13 @@ function App() {
       setClickTimeout(timeout);
     }
   };
-
+ 
   // Updates color of a specific circle
   const handleColorChange = (index, color) => {
     setCircles((prevCircles) =>
       prevCircles.map((circle, i) => {
         if (i === index) {
+          applyHighlightStyles(color, globalOpacity); // Update highlight style without refreshing
           return { ...circle, color, isSpeechBubbleOpen: false };
         }
         return circle;
@@ -230,6 +250,10 @@ function App() {
         target="_blank"
         rel="noopener noreferrer"
         className="redirect-text"
+
+        onClick={(e) => {
+          e.preventDefault();          
+        }}
       >
         READEASE
       </a>
@@ -256,6 +280,7 @@ function App() {
           progressLoading={progressLoading}
           statusText={statusText}
           statusVisible={statusVisible}
+          applyHighlightStyles={applyHighlightStyles}
         />
       ) : (
         <Login />

@@ -111,6 +111,78 @@ async def generate_analysis_groq(text):
         return {"keywords": [], "sentences": []}
 
 
+async def generate_analysis_sentence_rank(text):
+    # Configure the API with the key
+    load_dotenv()
+    genai.configure(api_key=os.getenv("API_KEY"))
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    """Helper method to generate analysis using the Gemini model"""
+    prompt = f""" 
+        Analyze the text below and rank each sentence based on its relevance in conveying information. Follow these specific instructions:
+
+        1. **Keywords extraction rules**:
+        - Extract the most important keywords or phrases that capture the core ideas of the text.
+        - Each keyword should be 1-3 words maximum.
+        - Include only nouns, proper names, and technical terms.
+        - Exclude common words and generic verbs.
+        - Keywords should be lowercase unless they are proper nouns.
+        - Sort keywords alphabetically.
+        - Remove any punctuation from keywords.
+        - **Examples**:
+            - Valid: "machine learning," "Einstein," "global warming."
+            - Invalid: "is," "run," "quickly."
+
+        2. **Relevance ranking for sentences**:
+        - Rank each sentence based on how much information it provides:
+            - **Low**: The sentence provides little to no new information or is overly generic.
+            - **Average**: The sentence provides some relevant information but lacks unique or critical insights.
+            - **High**: The sentence conveys key ideas, core arguments, or critical information central to understanding the main text.
+        - Consider sentences independently and in the context of the paragraph they belong to.
+        - Be consistent in applying the ranking criteria.
+
+        3. **Output format**:
+        - Return the results as a Python dictionary in this exact format:
+        {{
+            "keywords": [
+                "keyword1",
+                "keyword2",
+                "keyword3"
+            ],
+            "sentences": [
+                ["sentence 1", "low"],
+                ["sentence 2", "average"],
+                ["sentence 3", "high"]
+            ]
+        }}
+
+        4. **Examples**:
+        - **Low**: "The sky is blue." (Generic, not critical to the text's meaning.)
+        - **Average**: "The experiment produced unexpected results, but further analysis is needed." (Somewhat relevant but not highly informative.)
+        - **High**: "The discovery of DNA's double-helix structure revolutionized biology and genetics." (Highly informative and central to the topic.)
+
+        **Note**: The extracted sentences and keywords should work together to provide a clear understanding of the main idea of the passage. 
+
+        Text to analyze: {text}
+    """
+
+    response = model.generate_content(prompt)
+    raw_text = response.text.strip()
+
+    # Remove code block markers if present
+    if raw_text.startswith("```") and raw_text.endswith("```"):
+        raw_text = raw_text.split("\n", 1)[1].rsplit("\n", 1)[0].strip()
+        if raw_text.startswith("python"):
+            raw_text = raw_text[6:].strip()
+
+    try:
+        # Use ast.literal_eval instead of eval for safety
+        return ast.literal_eval(raw_text)
+    except (SyntaxError, ValueError):
+        # If parsing fails, return empty results
+        return {"keywords": [], "sentences": []}
+
+
 async def generate_analysis(text):
 
     # Configure the API with the key

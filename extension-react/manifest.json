@@ -2,19 +2,17 @@
     "manifest_version": 3,
     "name": "ReadEase",
     "version": "1.0.0",
-    "action": { 
-        "default_popup": "index.html" 
+    "key": "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCFeZr9U6VrFtzutU2dUokAEl0LwHmWutAOLnKudg5AZmqh6g+LBvDQ1QoPpfGRF//W8gR+nOUaintk72G44UOLDukUtRTivPDOvWNxdjHNPR/HfKJ7nlXDr0MhdJQcClagooU54diFcimVLaCgypmMm6uuurA5j3ZrfjVyc9qPWnK2xY2o9jhHKa3gBqfVew9lQye1XfZbp9CxAnJtEp1UG21sZ5bGae4D6GemmO0pitymnByKC78qgct/Mfkbiv1ywEN50P9vKcdZ50OSeq/zD8Ug2xpu8baFRRywHuXJzVm9XywvNK1l+67i3u9DZk3mku7QRQoN4f7+YeS75WV1AgMBAAECggEACP1z/9cSn7VmWRpTaXgbK9WQzc9U1omrpMuNGYzFu0xf/JrgGXb0tmQlrYB5q6eoVD5wfg9W67mNw8fPLF2D0p8aT4o+J2LJfMCggjkPSVRyH69t3udUaH3qsXCsNH1KcL8G5oCnOEnEXOdkrR/S8CJgvGqXnwY3gthOhPB3tUsDOHfc5JpCu1ZiAVjBDb4pUpsqZqdqFApSthj55fvkrFq5tgnRd9vGcLcMgoJFebBazmffjfdOSbr0mpLQvHwQs/CTW7TfiGzr6JNMeL1qD5IWcVJo0wZ2xUsXl6adXebpb7jv+wr9Qd3trO01hQ20KDr4IwK7hwZwO9uKgpPCsQKBgQC6K8C6xx1NStCMIxjQo0OLIQ3xbpZ+imlUxNma/ap4GMt5wIiEd2QUJdenaOzyAuoaOANq2/qJoeSKUbc+rVo+OO0NXT2YWzusVmNnbCSLdxdZg4dMWnJSkYZFYi4ztP6FiXOlcNY4hm+rvyQmQGj+JfAokjMDN8ebI6g3CFs8mQKBgQC3ifXee7WFggofYrPhWuq8rh4DeTxm09InayhtGAUyWmxCYmjC2tW8iDu7SeR4HQA/qr8M6mFrwciHT7X7NAXvi5AJKKKQa7LalNQ/gy7/aqZ2fm8pGPTIymmftjQQyUq0xXdNVGJ6vTP7oMEhDWV1YDO2OjE8SvmPOitWVaO9PQKBgQCfd+Th2Lb/wwr6TwHtjTvJDCpOWSTuBY+N/gRLn+eKceqxQrtthHskSvn7u4PjFZ4DkWFUAlQL2rHRzYdCV+lKDSb44JpnTBbEW0dQirCPChblJSYawArXMTIrcpsSzYGLTx7RYuMMjhNPsS282kVVFZgumHS71+bRu+xWH4FPWQKBgQCA2lBM49jqZAMrSaYznhqSYEMd+S1Ym3k8x1RYUrbDRQwgBuq5cd0AQTx+HkBRuzqDeCIstRe0CRX5ORLvyvQn2nlClM6cSaAFKNthw31pP7yiD92GosindsN0pvwilM7n3oIFPirtNIucKp2r0LXcE6/6TRxn0dMmpJXsRK9xmQKBgFVeagk5NtRv8fn9TMKMIl544eaQYRH63Avt43N5MOedadAURQx9gvApVXyUUklU/58of/QTTGs+ZSpoRZCxUcEAJu+VC3PvMNlOI+YjLvYYQHBWIr2FXEofhgoWvppLxgJviTPjbxjgiIrG73sKFJ2sUDgkZUl6T/mrcVIY3Wz7",
+    "action": {
+        "default_popup": "index.html"
     },
-    "content_scripts": [
-        {
-            "matches": ["https://*/*", "http://*/*"],
-            "js": ["src/scripts/content.jsx"],
-            "run_at": "document_idle"
-        }
-    ],
+    "content_scripts": [{
+        "matches": ["https://*/*"],
+        "js": ["src/scripts/content.jsx"]
+    }],
     "permissions": [
-        "storage", 
-        "activeTab", 
+        "storage",
+        "activeTab",
         "identity"
     ],
     "oauth2": {
@@ -29,10 +27,8 @@
         "https://*.googleapis.com/*",
         "https://*.firebaseapp.com/*"
     ],
-    "web_accessible_resources": [
-        {
-            "resources": ["assets/*"],
-            "matches": ["https://*/*"]
-        }
-    ]
+    "web_accessible_resources": [{
+        "resources": ["assets/*"],
+        "matches": ["https://*/*"]
+    }]
 }

@@ -1,6 +1,25 @@
 // highlight.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
+const Tooltip = ({ text, style }) => {
+  return (
+    <div className="tooltip" style={{ 
+      position: 'absolute', 
+      backgroundColor: '#333', 
+      color: '#fff', 
+      padding: '5px 10px', 
+      borderRadius: '5px', 
+      fontSize: '10px', 
+      zIndex: 1000, 
+      whiteSpace: 'wrap',
+      ...style 
+    }}>
+      {text}
+    </div>
+  );
+};
+
+
 const Highlight = ({
   globalOpacity, // Current global opacity for highlights
   setGlobalOpacity, // Function to update the global opacity
@@ -11,13 +30,15 @@ const Highlight = ({
   progressBarColor, // Color of the progress bar
   progressLoading, // Boolean to control progress bar visibility
   statusText, // Text to display as the current status
-  statusVisible // Boolean to control the visibility of status text
+  statusVisible,// Boolean to control the visibility of status text
+  applyHighlightStyles // Function to apply highlight styles to the selected text
 }) => {
   
   // State and references for opacity slider
   const sliderRef = useRef(null); // Reference to the SVG slider element
   const [isDragging, setIsDragging] = useState(false); // Tracks if the opacity slider is being dragged
   const [lastAngle, setLastAngle] = useState(null); // Tracks the last angle for drag direction
+  const [tooltip, setTooltip] = useState({ visible: false, text: '', x: 0, y: 0 });
 
   // Function to calculate the angle for the opacity slider based on mouse movement
   const calculateAngle = (event) => {
@@ -106,7 +127,10 @@ const Highlight = ({
   const handleMouseMove = (event) => {
     if (isDragging) setGlobalOpacity(calculateAngle(event)); // Update opacity during drag
   };
-  const handleMouseUp = () => setIsDragging(false); // Stop dragging
+  const handleMouseUp = () => {
+    setIsDragging(false); // Stop dragging
+    applyHighlightStyles(null, globalOpacity); // Apply highlight styles after opacity change
+  }
 
   // Effect to detect mouse release outside the slider
   React.useEffect(() => {
@@ -114,6 +138,15 @@ const Highlight = ({
     document.addEventListener('mouseup', handleMouseUpOutside);
     return () => document.removeEventListener('mouseup', handleMouseUpOutside);
   }, []);
+
+  const handleMouseOver = (e, text) => {
+    const { clientX: x, clientY: y } = e;
+    setTooltip({ visible: true, text, x, y });
+  };
+
+  const handleMouseOut = () => {
+    setTooltip({ visible: false, text: '', x: 0, y: 0 });
+  };
 
   return ( 
     <div id="body" onClick={(e) => e.stopPropagation()}> {/* Prevent propagation of clicks */}
@@ -165,7 +198,7 @@ const Highlight = ({
                   r="5"
                   fill="white"
                   style={{ cursor: "pointer" }}
-                  onMouseDown={handleMouseDown}
+                  onMouseDown={handleMouseDown}                  
                 />
               );
             })()}
@@ -181,9 +214,14 @@ const Highlight = ({
               onClick={(e) => {
                 e.stopPropagation(); // Prevent bubbling
                 handleClick(index); // Handle click events
-              }}
-            >
-              {/* Render speech bubble for color options */}
+                }}
+                onMouseOver={(e) => {
+                setTimeout(() => handleMouseOver(e, `double-click to change color`), 1500);
+                }}
+                
+                onMouseOut={handleMouseOut}
+              >
+                {/* Render speech bubble for color options */}
               {circle.isSpeechBubbleOpen && (
                 <div className="speech-bubble">
                   {colorOptions.map((color, i) => (
@@ -216,6 +254,9 @@ const Highlight = ({
         {/* Status text */}
         <div className={`status-text ${statusVisible ? '' : 'hidden'}`}>{statusText}</div>
       </div>
+      {tooltip.visible && (
+        <Tooltip text={tooltip.text} style={{ top: tooltip.y, left: tooltip.x }} />
+      )}
     </div>
   );
 };
