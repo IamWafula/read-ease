@@ -2,9 +2,75 @@
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
 const styleSheet = document.createElement("style");
-document.head.appendChild(styleSheet);
 var currentColor = 'yellow';
 
+styleSheet.textContent += `
+  .read-ease-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    padding: 8px 16px;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-family: Arial, sans-serif;
+    transition: transform 0.2s;
+  }
+  .read-ease-button:hover {
+    transform: scale(1.05);
+  }
+`;
+document.head.appendChild(styleSheet);
+
+let floatingButton = null;
+let isPopupOpen = false;
+
+function createFloatingButton() {
+    floatingButton = document.createElement('button');
+    floatingButton.className = 'read-ease-button';
+    floatingButton.textContent = 'ReadEase';
+    
+    floatingButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        chrome.runtime.sendMessage({ action: "openPopup" });
+    });
+  
+    document.body.appendChild(floatingButton);
+
+    // Check initial popup state
+    chrome.runtime.sendMessage({ action: "checkPopupState" }, (response) => {
+        if (response && response.isOpen) {
+            floatingButton.style.display = 'none';
+        }
+    });
+}
+
+// Listen for popup state changes
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "popupStateChange") {
+        console.log('Popup state changed:', request.isOpen);
+        isPopupOpen = request.isOpen;
+        if (floatingButton) {
+            floatingButton.style.display = isPopupOpen ? 'none' : 'block';
+        }
+    }
+});
+
+// Listen for focus changes to detect popup close
+window.addEventListener('focus', () => {
+    if (isPopupOpen) {
+        isPopupOpen = false;
+        if (floatingButton) {
+            floatingButton.style.display = 'block';
+        }
+    }
+});
+
+createFloatingButton();
 
 function getWikipediaText() {
     const text = document.getElementById("bodyContent").innerText;

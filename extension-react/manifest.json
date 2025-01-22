@@ -10,10 +10,15 @@
         "matches": ["https://*/*"],
         "js": ["src/scripts/content.jsx"]
     }],
+    "background": {
+        "service_worker": "src/scripts/background.jsx",
+        "type": "module"
+    },
     "permissions": [
         "storage",
         "activeTab",
-        "identity"
+        "identity",
+        "scripting"
     ],
     "oauth2": {
         "client_id": "763128562280-rfoqnj6cul904pm54qls38839anmecvg.apps.googleusercontent.com",

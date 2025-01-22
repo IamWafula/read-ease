@@ -49,6 +49,12 @@ function App() {
     return () => unsubscribe();
     
   }, []);
+
+  useEffect(() => {
+    const port = chrome.runtime.connect({ name: "popup" });
+    return () => port.disconnect();
+  }, []);
+
   
 
   // Render loading state
