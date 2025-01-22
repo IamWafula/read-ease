@@ -7,23 +7,66 @@ var currentColor = 'yellow';
 styleSheet.textContent += `
   .read-ease-button {
     position: fixed;
-    top: 20px;
     right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 10000;
-    padding: 8px 16px;
-    background: #4285f4;
-    color: white;
+    width: 40px;
+    height: 40px;
+    background: rgba(66, 133, 244, 0.9);
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    font-family: Arial, sans-serif;
-    transition: transform 0.2s;
+    border-radius: 20px;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
   }
+
   .read-ease-button:hover {
-    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  .read-ease-button::before {
+    content: "📚";
+    font-size: 20px;
+    pointer-events: none;
+  }
+
+  .read-ease-button.dismissed {
+    display: none;
+  }
+  .read-ease-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .read-ease-button:hover .read-ease-close {
+    display: flex;
+  }
+
+  .read-ease-drag {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: ns-resize;
   }
 `;
+
 document.head.appendChild(styleSheet);
 
 let floatingButton = null;
@@ -32,21 +75,42 @@ let isPopupOpen = false;
 function createFloatingButton() {
     floatingButton = document.createElement('button');
     floatingButton.className = 'read-ease-button';
-    floatingButton.textContent = 'ReadEase';
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'read-ease-close';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        floatingButton.classList.add('dismissed');
+    };
+    
+    let isDragging = false;
+    let startY;
+    
+    floatingButton.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startY = e.clientY - floatingButton.offsetTop;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const newY = e.clientY - startY;
+        floatingButton.style.top = `${newY}px`;
+        floatingButton.style.transform = 'none';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
     
     floatingButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        chrome.runtime.sendMessage({ action: "openPopup" });
-    });
-  
-    document.body.appendChild(floatingButton);
-
-    // Check initial popup state
-    chrome.runtime.sendMessage({ action: "checkPopupState" }, (response) => {
-        if (response && response.isOpen) {
-            floatingButton.style.display = 'none';
+        if (!isDragging) {
+            chrome.runtime.sendMessage({ action: "openPopup" });
         }
     });
+
+    floatingButton.appendChild(closeBtn);
+    document.body.appendChild(floatingButton);
 }
 
 // Listen for popup state changes
