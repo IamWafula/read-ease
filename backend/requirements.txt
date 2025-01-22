@@ -1,5 +1,5 @@
 cmake==3.31.2
-numpy==2.2.1
+numpy==2.0.2
 packaging==24.2
 pandas==2.2.3
 pdf2image==1.17.0
@@ -9,3 +9,15 @@ python-dateutil==2.9.0.post0
 pytz==2024.2
 six==1.17.0
 tzdata==2024.2
+asgiref==3.7.2
+uvicorn==0.27.0
+flask==3.0.2
+flask-cors==4.0.0
+flask-limiter==3.5.0
+flask-sqlalchemy==3.1.1
+python-dotenv==1.0.1
+google-generativeai==0.3.2
+firebase-admin==6.1.0
+redis==5.0.0
+motor==3.1.1
+pymongo==4.3.3

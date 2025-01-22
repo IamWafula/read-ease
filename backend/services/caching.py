@@ -11,7 +11,7 @@ def get_redis_client():
     if os.getenv("ENV") == "production":
         pass
     else:
-        return redis.Redis(host="localhost", port="6379")
+        return redis.Redis(host="redis", port="6379")
 
 
 def cache_url(url, summarized_data):
