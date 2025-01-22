@@ -17,6 +17,7 @@ from spacy.lang.en import English
 import numpy as np
 from sentence_transformers import util
 import pickle
+import time
 
 
 text_processing_bp = Blueprint("process-text", __name__)
@@ -78,10 +79,23 @@ def generate_embeddings(text, my_key):
     return response
 
 
+def generate_batch_embeddings(sentences, key):
+    genai.configure(api_key=os.getenv("IAN_API_KEY"))
+
+    response = genai.embed_content(model="models/text-embedding-004", content=sentences)
+
+    return response["embedding"]
+
+
 def get_embeddings(sentences, key):
     embeddings = []
-    for sentence in sentences:
-        embeddings.append(generate_embeddings(sentence, key)["embedding"])
+
+    batch_size = 250
+
+    for i in range(0, len(sentences), batch_size):
+        batch = sentences[i : i + batch_size]
+        embeddings += generate_batch_embeddings(batch, key)
+
     return embeddings
 
 
@@ -165,18 +179,24 @@ async def process_text_transformer():
     #     with open("embeddings.pkl", "rb") as f:
     #         embeddings = pickle.load(f)
     # else:
+    initial_time = time.time()
     print("Generating embeddings")
     embeddings = get_embeddings(all_sentences, os.getenv("IAN_API_KEY"))
+    print("Time taken to generate embeddings: ", time.time() - initial_time)
 
     # save the embeddings
-    with open("embeddings.pkl", "wb") as f:
-        pickle.dump(embeddings, f)
+    # with open("embeddings.pkl", "wb") as f:
+    #     pickle.dump(embeddings, f)
 
+    initial_time = time.time()
     print("Generating full text embeddings")
     full_text_embedding = generate_full_text_embeddings(embeddings)
+    print("Time taken to generate full text embeddings: ", time.time() - initial_time)
 
+    initial_time = time.time()
     print("Getting key sentences")
     top_sentences = get_key_sentences(all_sentences, embeddings, full_text_embedding)
+    print("Time taken to get key sentences: ", time.time() - initial_time)
 
     if ranking:
         ranking = int(ranking)
