@@ -5,9 +5,10 @@ import { clientId } from '../config';
 
 // Login component to handle Google OAuth authentication
 const Login = () => {
-
   // Function to handle the login process using Google's OAuth flow
   const handleLogin = () => {
+    console.log("starting user auth")
+
     // Google OAuth 2.0 URL for authentication
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=https://${chrome.runtime.id}.chromiumapp.org/&response_type=token&scope=email%20profile%20openid`;
 

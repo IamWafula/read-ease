@@ -13,7 +13,8 @@
     "permissions": [
         "storage",
         "activeTab",
-        "identity"
+        "identity",
+        "tabs"
     ],
     "oauth2": {
         "client_id": "763128562280-rfoqnj6cul904pm54qls38839anmecvg.apps.googleusercontent.com",

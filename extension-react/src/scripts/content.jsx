@@ -5,6 +5,7 @@ const styleSheet = document.createElement("style");
 document.head.appendChild(styleSheet);
 var currentColor = 'yellow';
 
+console.log('Content script loaded');
 
 function getWikipediaText() {
     const text = document.getElementById("bodyContent").innerText;
@@ -264,7 +265,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         "text": textContent,
                         "uid" : uid,
                         "url" : currentUrl,
-                        "ranking": 4
+                        "ranking": 3
                      })
                 });
                 // Check if response is not OK
