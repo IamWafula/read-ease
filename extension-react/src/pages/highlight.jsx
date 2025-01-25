@@ -188,16 +188,21 @@ const Highlight = ({
           >
             {/* Gradient for opacity slider */}
             <defs>
-              <linearGradient id="opacityGradient" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stopColor="rgba(0, 0, 0, 0)" />
-                <stop offset="100%" stopColor="rgba(0, 0, 0, 1)" />
+              <linearGradient 
+                id="opacityGradient" 
+                gradientUnits="userSpaceOnUse"
+                x1="80" y1="50" 
+                x2="20" y2="50"
+              >
+                <stop offset="0%" stopColor="#d3d3d3" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#808080" stopOpacity="1" />
               </linearGradient>
             </defs>
 
             {/* Active arc representing current opacity */}
             <path
               d={describeArc(50, 50, 45, 15, 15 + globalOpacity * 330)}
-              stroke="darkgray"
+              stroke="url(#opacityGradient)"
               strokeWidth="10"
               strokeLinecap="round"
               fill="none"
@@ -208,10 +213,11 @@ const Highlight = ({
               d={describeArc(50, 50, 45, 15 + globalOpacity * 330, 345)}
               stroke="#d3d3d3"
               strokeWidth="10"
+              strokeOpacity="0.2"
               strokeLinecap="round"
               fill="none"
             />
-
+            
             {/* Slider indicator */}
             {(() => {
               const position = getIndicatorPosition(45, globalOpacity);
