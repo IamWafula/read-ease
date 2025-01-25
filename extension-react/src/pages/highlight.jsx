@@ -20,6 +20,7 @@ const Tooltip = ({ text, style }) => {
 };
 
 
+
 const Highlight = ({
   globalOpacity, // Current global opacity for highlights
   setGlobalOpacity, // Function to update the global opacity
@@ -125,11 +126,34 @@ const Highlight = ({
   // Event handlers for slider interaction
   const handleMouseDown = () => setIsDragging(true); // Start dragging
   const handleMouseMove = (event) => {
-    if (isDragging) setGlobalOpacity(calculateAngle(event)); // Update opacity during drag
+    if (isDragging) {
+      const newOpacity = calculateAngle(event);
+      setGlobalOpacity(newOpacity);
+            
+      // Show tooltip with opacity percentage
+      const percentage = Math.round(newOpacity * 100);
+      setTooltip({
+        visible: true,
+        text: `${percentage}%`,
+        x: event.clientX + 10,
+        y: event.clientY + 10
+      });
+    }
   };
+
   const handleMouseUp = () => {
-    setIsDragging(false); // Stop dragging
-    applyHighlightStyles(null, globalOpacity); // Apply highlight styles after opacity change
+    setIsDragging(false);
+    setTooltip({ visible: false, text: '', x: 0, y: 0 });
+    
+    // Add snap effect
+    if (globalOpacity === 0 || globalOpacity === 1) {
+      sliderRef.current.classList.add('snap-effect');
+      setTimeout(() => {
+        sliderRef.current?.classList.remove('snap-effect');
+      }, 200);
+    }
+    
+    applyHighlightStyles(null, globalOpacity);
   }
 
   // Effect to detect mouse release outside the slider

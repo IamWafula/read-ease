@@ -11,8 +11,8 @@ styleSheet.textContent += `
     top: 50%;
     transform: translateY(-50%);
     z-index: 10000;
-    width: 40px;
-    height: 40px;
+    width: clamp(40px, 3vw, 60px);
+    height: clamp(40px, 3vw, 60px);
     background: rgba(66, 133, 244, 0.9);
     border: none;
     border-radius: 20px;
@@ -31,7 +31,7 @@ styleSheet.textContent += `
 
   .read-ease-button::before {
     content: "📚";
-    font-size: 20px;
+    font-size: clamp(20px, 1.5vw, 30px);
     pointer-events: none;
   }
 
