@@ -1,10 +1,11 @@
 // this is the main script for the extension
 // it will have access to the DOM (the main page, not the popup) and the browser API
 
-console.log('Content script loaded.');
-
 const styleSheet = document.createElement("style");
 document.head.appendChild(styleSheet);
+var currentColor = 'yellow';
+
+console.log('Content script loaded');
 
 function getWikipediaText() {
     const text = document.getElementById("bodyContent").innerText;
@@ -121,7 +122,6 @@ function highlightInPlace(phrases, nodes, offsets, textContent) {
     // Apply highlights to matches
     for (let i = matches.length - 1; i >= 0; i--) {
         let match = matches[i];
-        console.log('Processing match:', match);
 
         try {
             // Find starting node
@@ -147,9 +147,7 @@ function highlightInPlace(phrases, nodes, offsets, textContent) {
             
             try {
                 range.surroundContents(highlightSpan);
-                console.log('Successfully highlighted:', match.match);
             } catch (e) {
-                console.log('surroundContents failed, trying alternative method:', e);
                 const fragment = range.extractContents();
                 highlightSpan.appendChild(fragment);
                 range.insertNode(highlightSpan);
@@ -167,7 +165,6 @@ function highlightInPlace(phrases, nodes, offsets, textContent) {
 
 
 function boldKeywords(keywords, nodes, offsets, textContent) {
-    console.log('Starting boldKeywords with keywords:', keywords);
 
     // Escape special characters in keywords
     keywords = keywords.map(keyword => keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
@@ -211,12 +208,7 @@ function boldKeywords(keywords, nodes, offsets, textContent) {
             if (startOffset > startNode.length) startOffset = startNode.length;
 
             if (endOffset < 0) endOffset = 0;
-            if (endOffset > endNode.length) endOffset = endNode.length;
-
-            // Add debug logging
-            console.log(`Bolding keyword: ${match.match}`);
-            console.log(`Start Node Length: ${startNode.length}, Start Offset: ${startOffset}`);
-            console.log(`End Node Length: ${endNode.length}, End Offset: ${endOffset}`);
+            if (endOffset > endNode.length) endOffset = endNode.length;            
 
             let range = document.createRange();
             range.setStart(startNode, startOffset);
@@ -258,8 +250,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         async function getKeywords() {
             const { textContent, nodes, offsets } = retrieveText();
+
+            // const url  = "'https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text'";
+            const url = 'http://127.0.0.1:3000/process-text/text';
+
             try {
-                const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text', {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -268,7 +264,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     body: JSON.stringify({ 
                         "text": textContent,
                         "uid" : uid,
-                        "url" : currentUrl
+                        "url" : currentUrl,
+                        "ranking": 3
                      })
                 });
                 // Check if response is not OK
@@ -292,7 +289,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         boldKeywords(data.keywords, nodes, offsets, textContent);
                     }
                     const endTime = performance.now();
-                    console.log(`Highlighting and bolding completed in ${(endTime - startTime).toFixed(2)}ms`);
+
+                    // TODO: Add logging for highlighting and bolding completion
+                    // console.log(`Highlighting and bolding completed in ${(endTime - startTime).toFixed(2)}ms`);
                 }
             sendResponse({status: "highlighted"});
             } catch (error) {
@@ -304,8 +303,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         getKeywords();
         return true;
-    } else if (request.action === "applyHighlightStyles") {
-        const color = request.color || 'yellow';  // Default to yellow if no color provided
+    } 
+    else if (request.action === "applyHighlightStyles") {
+
+        console.log('Received request to update highlight styles:', request);
+        
+        const color = request.color? request.color : currentColor;  // Default to yellow if no color provided
+        currentColor = color;
         const opacity = request.opacity || 1;
 
         // Update global style to change the highlight color and opacity
