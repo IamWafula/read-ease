@@ -434,20 +434,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } 
     else if (request.action === "applyHighlightStyles") {
-
         console.log('Received request to update highlight styles:', request);
         
-        const color = request.color? request.color : currentColor;  // Default to yellow if no color provided
-        currentColor = color;
+        // Determine color and opacity from message (default if not provided)
+        const newColor = request.color ? request.color : currentColor;  
         const opacity = request.opacity || 1;
-
-        // Update global style to change the highlight color and opacity
-        styleSheet.textContent = updateHighlightStyle(color, opacity);
-
-        console.log('Highlight styles updated.');
+        
+        // Toggle highlights between colored and transparent
+        if (typeof window.isHighlightColored === "undefined") {
+            window.isHighlightColored = true; // default state: colored
+        }
+        
+        if (window.isHighlightColored) {
+            // Set style to transparent highlights
+            styleSheet.textContent = `
+                .read-ease-highlight {
+                    background-color: transparent !important;
+                    border-radius: 2px;
+                }
+                .read-ease-bold {
+                    font-weight: bold;
+                }
+            `;
+            window.isHighlightColored = false;
+            console.log('Highlights toggled to transparent.');
+        } else {
+            // Set style to colored highlights
+            currentColor = newColor;
+            styleSheet.textContent = updateHighlightStyle(newColor, opacity);
+            window.isHighlightColored = true;
+            console.log('Highlights toggled to colored.');
+        }
         sendResponse({ status: "styles_updated" });
-
-        // No need to keep the listener alive for asynchronous response
         return false;
     }
     return false;
