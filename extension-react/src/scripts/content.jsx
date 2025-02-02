@@ -394,7 +394,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         "text": textContent,
                         "uid" : uid,
                         "url" : currentUrl,
-                        "ranking": 4
+                        "ranking": 3
                      })
                 });
                 // Check if response is not OK

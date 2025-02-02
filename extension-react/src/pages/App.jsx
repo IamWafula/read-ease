@@ -45,7 +45,7 @@ function App() {
       setUser(currentUser);
       setLoading(false);
     });
-    console.log(user)
+    
     return () => unsubscribe();
     
   }, []);
@@ -168,7 +168,7 @@ function App() {
           (response) => {
             if (chrome.runtime.lastError) {
               // TODO : Log errors
-              // console.error('Error sending message:', chrome.runtime.lastError.message);
+              console.error('Error sending message:', chrome.runtime.lastError.message);
               setProgressLoading(false);
               setStatusText('Error fetching words.');
               setTimeout(() => setStatusVisible(false), 1000);

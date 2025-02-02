@@ -18,6 +18,7 @@
         "storage",
         "activeTab",
         "identity",
+        "tabs",
         "scripting"
     ],
     "oauth2": {
