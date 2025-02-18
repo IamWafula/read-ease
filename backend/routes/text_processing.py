@@ -5,6 +5,7 @@ from services.text_analysis import generate_analysis
 
 from utils.decorators import authorization_required, async_authorization_required
 from services.caching import cache_url, retrieve_cache_url
+from utils.limiter import limiter
 
 import json
 
@@ -160,6 +161,7 @@ def get_all_sentences(text):
 
 
 @text_processing_bp.route("/text", methods=["POST"])
+@limiter.limit("2 per day")
 async def process_text_transformer():
     print("Processing text")
     data = request.get_json()

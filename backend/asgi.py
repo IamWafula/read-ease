@@ -12,6 +12,8 @@ from flask_limiter.util import get_remote_address
 
 from flask_sqlalchemy import SQLAlchemy
 
+from utils.limiter import limiter
+
 # blueprint imports
 from routes.text_processing import text_processing_bp
 from routes.user import user_bp
@@ -28,10 +30,7 @@ def create_app():
     app = Flask(__name__)
     CORS(app, supports_credentials=True, allow_headers="*")
 
-    limiter = Limiter(
-        app,
-        default_limits=["1 per minute"],
-    )
+    limiter.init_app(app)
 
     # Register the blueprint for text processing
     app.register_blueprint(user_bp, url_prefix="/user")
