@@ -161,7 +161,7 @@ def get_all_sentences(text):
 
 
 @text_processing_bp.route("/text", methods=["POST"])
-@limiter.limit("2 per day")
+#@limiter.limit("2 per day")
 async def process_text_transformer():
     print("Processing text")
     data = request.get_json()

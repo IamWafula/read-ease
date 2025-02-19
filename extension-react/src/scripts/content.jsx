@@ -148,7 +148,7 @@ function updateHighlightStyle(color, opacity) {
     return `
         .read-ease-highlight {
             background-color: ${rgbaColor} !important;
-            // opacity: ${opacity} !important;
+            /* opacity: ${opacity} !important; */
             border-radius: 2px;
         }
         .read-ease-bold {
@@ -193,6 +193,10 @@ function retrieveText() {
                 if (node.parentElement && skipTags.includes(node.parentElement.tagName)) {
                     return NodeFilter.FILTER_REJECT;
                 }
+                // Ignore text nodes that are part of extension elements
+                if (node.parentElement && node.parentElement.closest('.read-ease-button, .read-ease-close, .read-ease-drag')) {
+                    return NodeFilter.FILTER_REJECT;
+                }
                 return NodeFilter.FILTER_ACCEPT;
             }
         }
@@ -213,23 +217,16 @@ function retrieveText() {
 }
 
 function highlightInPlace(phrases, nodes, offsets, textContent) {
-    //console.log('Starting highlightInPlace with phrases:', phrases);
-
     // Sort phrases by length to avoid overlapping matches
     phrases.sort((a, b) => b.length - a.length);
-    //console.log('Sorted phrases:', phrases);
+    console.log(phrases)
 
-    // Escape special characters in phrases
-    phrases = phrases.map(phrase => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    
-    // Add negative lookbehind and negative lookahead to each phrase
-    phrases = phrases.map(phrase => `(?<!\\w)${phrase}(?!\\w)`);
-    //console.log('Processed phrases:', phrases);
-
-    // Combine phrases into a single regex pattern
-    const regex = new RegExp(phrases.join('|'), 'gi');
-    //console.log('Created regex:', regex);
-
+    // Escape special characters in phrases and add lookahead/behind boundaries
+    phrases = phrases.map(sentence =>
+    sentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+    const regex = new RegExp(phrases.join('|'), 'gs');
+        
     let match;
     let matches = [];
 
@@ -241,50 +238,84 @@ function highlightInPlace(phrases, nodes, offsets, textContent) {
         });
     }
 
-    // Handle overlapping matches
-    matches = matches.filter((match, index) => {
+    // Remove overlapping matches
+    matches = matches.filter((curr, index) => {
         if (index === 0) return true;
-        const prevMatch = matches[index - 1];
-        return match.start >= prevMatch.end;
+        return curr.start >= matches[index - 1].end;
     });
 
-    // Apply highlights to matches
+    // Apply highlights (processing in reverse to preserve offsets)
     for (let i = matches.length - 1; i >= 0; i--) {
-        let match = matches[i];
+        const m = matches[i];
 
         try {
             // Find starting node
-            let startNodeIndex = offsets.findIndex((offset, idx) =>
-                offset <= match.start && (offsets[idx + 1] > match.start || idx === offsets.length - 1)
+            const startNodeIndex = offsets.findIndex((offset, idx) =>
+                offset <= m.start &&
+                (offsets[idx + 1] > m.start || idx === offsets.length - 1)
             );
-            let startNode = nodes[startNodeIndex];
-            let startOffset = match.start - offsets[startNodeIndex];
+            const startNode = nodes[startNodeIndex];
+            const startOffset = m.start - offsets[startNodeIndex];
 
             // Find ending node
-            let endNodeIndex = offsets.findIndex((offset, idx) =>
-                offset <= match.end && (offsets[idx + 1] > match.end || idx === offsets.length - 1)
+            const endNodeIndex = offsets.findIndex((offset, idx) =>
+                offset <= m.end &&
+                (offsets[idx + 1] > m.end || idx === offsets.length - 1)
             );
-            let endNode = nodes[endNodeIndex];
-            let endOffset = match.end - offsets[endNodeIndex];
+            const endNode = nodes[endNodeIndex];
+            const endOffset = m.end - offsets[endNodeIndex];
 
-            let range = document.createRange();
+            // Create range for highlighting
+            const range = document.createRange();
             range.setStart(startNode, startOffset);
             range.setEnd(endNode, endOffset);
 
-            let highlightSpan = document.createElement('span');
-            highlightSpan.className = 'read-ease-highlight';
-            
-            try {
-                range.surroundContents(highlightSpan);
-            } catch (e) {
-                const fragment = range.extractContents();
-                highlightSpan.appendChild(fragment);
-                range.insertNode(highlightSpan);
-                console.log('Alternative highlight method completed');
+            // If the range spans more than one node, avoid wrapping block elements
+            // instead, highlight within each node separately.
+            if (startNode !== endNode) {
+                // Fallback: split into two ranges so that each highlight stays in one text node.
+                // Highlight the part in the start node:
+                const rangeStart = document.createRange();
+                rangeStart.setStart(startNode, startOffset);
+                rangeStart.setEnd(startNode, startNode.textContent.length);
+                const spanStart = document.createElement('span');
+                spanStart.className = 'read-ease-highlight';
+                try {
+                    rangeStart.surroundContents(spanStart);
+                } catch (e) {
+                    const fragment = rangeStart.extractContents();
+                    spanStart.appendChild(fragment);
+                    rangeStart.insertNode(spanStart);
+                }
+                // Highlight the part in the end node:
+                const rangeEnd = document.createRange();
+                rangeEnd.setStart(endNode, 0);
+                rangeEnd.setEnd(endNode, endOffset);
+                const spanEnd = document.createElement('span');
+                spanEnd.className = 'read-ease-highlight';
+                try {
+                    rangeEnd.surroundContents(spanEnd);
+                } catch (e) {
+                    const fragment = rangeEnd.extractContents();
+                    spanEnd.appendChild(fragment);
+                    rangeEnd.insertNode(spanEnd);
+                }
+                // Note: If the match spans nodes in between, you might consider iterating each node
+                // and applying highlights there as well.
+            } else {
+                const highlightSpan = document.createElement('span');
+                highlightSpan.className = 'read-ease-highlight';
+                try {
+                    range.surroundContents(highlightSpan);
+                } catch (e) {
+                    const fragment = range.extractContents();
+                    highlightSpan.appendChild(fragment);
+                    range.insertNode(highlightSpan);
+                    console.log('Alternative highlight method completed');
+                }
             }
-
         } catch (e) {
-            console.error('Failed to highlight match:', match.match, e);
+            console.error('Failed to highlight match:', m.match, e);
             continue;
         }
     }
@@ -410,6 +441,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
                 if (data.sentences.length > 0 || data.keywords.length > 0) {
                     console.log('Starting highlighting and bolding process...');
+                    console.log('sentences:', data.sentences);
                     const startTime = performance.now();
                     if (data.sentences.length > 0) {
                         highlightInPlace(data.sentences, nodes, offsets, textContent);

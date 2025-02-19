@@ -30,7 +30,7 @@ def create_app():
     app = Flask(__name__)
     CORS(app, supports_credentials=True, allow_headers="*")
 
-    limiter.init_app(app)
+    #limiter.init_app(app)
 
     # Register the blueprint for text processing
     app.register_blueprint(user_bp, url_prefix="/user")
