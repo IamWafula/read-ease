@@ -166,6 +166,7 @@ function App() {
             auth_token: token
           },
           (response) => {
+            
             if (chrome.runtime.lastError) {
               // TODO : Log errors
               console.error('Error sending message:', chrome.runtime.lastError.message);

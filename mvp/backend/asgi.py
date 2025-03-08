@@ -1,0 +1,40 @@
+# Asgi file to run the flask app using uvicorn server
+from asgiref.wsgi import WsgiToAsgi
+import uvicorn
+
+# flask app imports
+from flask import Flask
+from flask_cors import CORS
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+from flask_sqlalchemy import SQLAlchemy
+
+from utils.limiter import limiter
+
+# blueprint imports
+from routes.text_processing import text_processing_bp
+from routes.main import main_bp
+
+from dotenv import load_dotenv
+import os
+
+
+def create_app():
+
+    load_dotenv()
+
+    app = Flask(__name__)
+    CORS(app, supports_credentials=True, allow_headers="*")
+
+    app.register_blueprint(text_processing_bp, url_prefix="/process-text")
+
+    return app
+
+
+app = create_app()
+asgi_app = WsgiToAsgi(app)
+
+if __name__ == "__main__":
+    uvicorn.run(asgi_app, host="0.0.0.0", port=3000, log_level="info")

@@ -1,0 +1,9 @@
+/* App.css */
+.highlight-sentence {
+  background-color: yellow;
+}
+
+.highlight-keyword {
+  font-weight: bold;
+  color: red;
+}

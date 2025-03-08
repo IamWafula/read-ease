@@ -31,6 +31,8 @@ async def process_text():
     text = data["text"]
     ranking = data.get("ranking", False)
 
+    print("Processing text", ranking)
+
     # TODO: re-introduce caching
     url = data.get("url", False)
     # url = None
@@ -111,12 +113,13 @@ def generate_full_text_embeddings(sentence_embeddings):
 # TODO: Ensure that we eliminate atleast half
 def cosine_to_rank(cosine_score):
     # convert cosine score to a rank
+    # TODO: Convert to dynamic buckets depending on data skew
     buckets = [0.65, 0.7, 0.75, 0.8, 0.9]
     buckets = sorted(buckets, reverse=True)
 
     for i, bucket in enumerate(buckets):
         if cosine_score >= bucket:
-            return 5 - i + 1
+            return 5 - i
 
     return 0
 
@@ -161,7 +164,7 @@ def get_all_sentences(text):
 
 
 @text_processing_bp.route("/text", methods=["POST"])
-#@limiter.limit("2 per day")
+# @limiter.limit("2 per day")
 async def process_text_transformer():
     print("Processing text")
     data = request.get_json()

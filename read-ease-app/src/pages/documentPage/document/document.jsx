@@ -9,9 +9,13 @@ export default function Document() {
   const [highlightOpacity, setHighlightOpacity] = useState(1); // Default: Fully opaque
   const [boldColor, setBoldColor] = useState('#FF0000'); // Default: Red
   const [docTitle, setDocTitle] = useState('Untitled Document'); // Default: Untitled Document
+  const [thresholdValue, setThresholdValue] = useState(3); // Default: 1
+  
+  var SERVER_URL = 'https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com';
+  SERVER_URL = 'http://localhost:3000';
+
 
   const editableBoxRef = useRef(null); // Reference to the contentEditable box
-
 
   const getCurrentUrl = () => {
     return window.location.href.split('/').pop();
@@ -42,16 +46,16 @@ export default function Document() {
     console.log(localStorage.getItem('read-ease-token'));
 
     try {
-      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/process-text', {
+      const response = await fetch(`${SERVER_URL}/process-text`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
           'Authorization': `Bearer ${localStorage.getItem('read-ease-token')}`,
         },
         body: JSON.stringify({ 
           text: inputText,
           uid: localStorage.getItem('read-ease-uid'),
+          ranking: parseInt(thresholdValue),
         }),
       });
 
@@ -106,7 +110,7 @@ export default function Document() {
   useEffect(() => {
     // Fetch the document content from the server
     const fetchDocument = async () => {
-      const response = await fetch('https://read-ease.eefka0ebbvvqc.us-east-1.cs.amazonlightsail.com/user/get_document', {
+      const response = await fetch(`${SERVER_URL}/user/get_document`, {
         method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -193,6 +197,7 @@ export default function Document() {
           </div>
         </div>
 
+
         <div className="flex flex-col gap-3">
           <label className="font-bold text-lg">Bold Color</label>
           <input
@@ -202,6 +207,24 @@ export default function Document() {
             className="w-full p-2 border rounded-full cursor-pointer"
             style={{ height: '40px' }}
           />
+        </div>
+      </div>
+
+
+      <div className="flex flex-col gap-3">
+        <label className="font-bold text-lg">Threshold</label>
+        <input
+          type="range"
+          min="0"
+          max="5"
+          step="1"
+          value={thresholdValue}
+          onChange={(e) => setThresholdValue(e.target.value)}
+          className="w-full"
+        />
+        <div className="flex justify-between text-sm">
+          <span>1</span>
+          <span>5</span>
         </div>
       </div>
 
